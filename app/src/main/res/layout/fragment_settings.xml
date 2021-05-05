@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".SettingsFragment"
+    android:orientation="vertical"
+    android:layout_centerHorizontal="true"
+    android:layout_marginTop="50dp"
+    android:layout_alignParentBottom="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_focus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Focus Session Duration"
+            android:textSize="16sp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/black"/>
+
+        <EditText
+            android:id="@+id/et_focustime"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:hint="Focus Time in Seconds"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:background="#E8E8E8"
+            android:layout_marginTop="25dp"
+            android:inputType="number"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp">
+
+        <TextView
+            android:id="@+id/tv_shortbreak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Break Session Duration"
+            android:textSize="16sp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/black"/>
+
+        <EditText
+            android:id="@+id/et_shortbreaktime"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:hint="Break Time in Seconds"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:background="#E8E8E8"
+            android:layout_marginTop="25dp"
+            android:inputType="number"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp">
+
+        <TextView
+            android:id="@+id/tv_longbreak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Long Break Session Duration"
+            android:textSize="16sp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/black"/>
+
+        <EditText
+            android:id="@+id/et_longbreaktime"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:hint="Long Break Time in Seconds"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:background="#E8E8E8"
+            android:layout_marginTop="25dp"
+            android:inputType="number"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp">
+
+        <TextView
+            android:id="@+id/tv_break"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Completed Tasks Required Before Long Break"
+            android:textSize="16sp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/black"/>
+
+        <EditText
+            android:id="@+id/et_tasks"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:hint="Required Tasks"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:background="#E8E8E8"
+            android:layout_marginTop="25dp"
+            android:inputType="number"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_alignParentBottom="true">
+
+            <Button
+                android:id="@+id/btn_submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SUBMIT"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>
