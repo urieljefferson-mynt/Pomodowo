@@ -7,7 +7,6 @@
     android:layout_height="60dp"
     android:id="@+id/todo_view">
 
-
     <TextView
         android:id="@+id/tv_todo_title"
         android:layout_width="0dp"
@@ -30,7 +29,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <View
-
         android:layout_width="match_parent"
         android:layout_height="5dp"
         android:background="@android:color/white"

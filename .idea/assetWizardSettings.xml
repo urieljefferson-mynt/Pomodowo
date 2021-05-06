@@ -11,12 +11,26 @@
                   <entry key="vectorAssetStep">
                     <value>
                       <PersistentState>
+                        <option name="children">
+                          <map>
+                            <entry key="clipartAsset">
+                              <value>
+                                <PersistentState>
+                                  <option name="values">
+                                    <map>
+                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/check_circle/baseline_check_circle_24.xml" />
+                                    </map>
+                                  </option>
+                                </PersistentState>
+                              </value>
+                            </entry>
+                          </map>
+                        </option>
                         <option name="values">
                           <map>
-                            <entry key="assetSourceType" value="FILE" />
-                            <entry key="color" value="989da1" />
-                            <entry key="outputName" value="ic_tick" />
-                            <entry key="sourceFile" value="$PROJECT_DIR$/../Downloads/tick.svg" />
+                            <entry key="color" value="121315" />
+                            <entry key="outputName" value="ic_check" />
+                            <entry key="sourceFile" value="C:\Users\Gerome\Desktop\test123\Downloads\tick.svg" />
                           </map>
                         </option>
                       </PersistentState>

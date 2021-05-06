@@ -8,14 +8,8 @@
 
     <!-- TODO: Update blank fragment layout -->
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="WORK TIME"
-        android:textAlignment="center"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="-16dp"
-        tools:layout_editor_absoluteY="33dp" />
+    <include
+        layout="@layout/appbar"/>
 
     <TextView
         android:id="@+id/tv_countdown"
@@ -52,7 +46,7 @@
         android:backgroundTint="#0000ff00"
         android:gravity="center"
         android:src="@drawable/ic_pause"
-        android:tint="#ee9595"
+        android:tint="@color/focus"
         app:iconGravity="textStart"
         app:layout_constraintBottom_toTopOf="@id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -67,7 +61,7 @@
         android:backgroundTint="#0000ff00"
         android:gravity="center"
         android:src="@drawable/ic_play"
-        android:tint="#ee9595"
+        android:tint="@color/focus"
         app:iconGravity="textStart"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -83,7 +77,7 @@
         android:backgroundTint="#0000ff00"
         android:gravity="center"
         android:src="@drawable/ic_play"
-        android:tint="#ee9595"
+        android:tint="@color/focus"
         app:iconGravity="textStart"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -99,7 +93,7 @@
         android:backgroundTint="#0000ff00"
         android:gravity="center"
         android:src="@drawable/ic_play"
-        android:tint="#ee9595"
+        android:tint="@color/focus"
         app:iconGravity="textStart"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -115,7 +109,7 @@
         android:backgroundTint="#0000ff00"
         android:gravity="center"
         android:src="@drawable/ic_stop"
-        android:tint="#ee9595"
+        android:tint="@color/focus"
         app:iconGravity="textStart"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -139,7 +133,7 @@
         android:layout_height="wrap_content"
         android:backgroundTint="#0000ff00"
         android:src="@drawable/ic_add"
-        android:tint="#ee9595"
+        android:tint="@color/focus"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

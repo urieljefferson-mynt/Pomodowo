@@ -1,5 +1,6 @@
 package ph.apper.android.pagatpatan.pomodowo
 
+import android.graphics.Color
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -7,12 +8,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import android.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todolistjeff.dao.DatabaseHandler
 import com.example.todolistjeff.model.TodoModelClass
+import kotlinx.android.synthetic.main.appbar.*
+import kotlinx.android.synthetic.main.appbar.view.*
 import kotlinx.android.synthetic.main.fragment_work.*
 import kotlinx.android.synthetic.main.fragment_work.view.*
+import kotlinx.android.synthetic.main.todo_view.*
+import kotlinx.android.synthetic.main.todo_view.view.*
 import ph.apper.android.pagatpatan.pomodowo.adapters.RVTodoAdapter
 import java.util.concurrent.TimeUnit
 
@@ -21,6 +28,8 @@ class WorkFragment : Fragment(){
 
     private lateinit var communicator: Communicator
 
+    lateinit var toolbar: Toolbar
+
     companion object {
         private lateinit var timer: CountDownTimer
         fun newInstance() = WorkFragment() // for menu
@@ -28,21 +37,27 @@ class WorkFragment : Fragment(){
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        val workView = inflater.inflate(R.layout.fragment_work, container, false)
+        val view = inflater.inflate(R.layout.fragment_work, container, false)
+
+        // Action Bar Buttons
+        view.ic_arrow_back.visibility = View.INVISIBLE
+        view.ic_menu.setOnClickListener{
+            settingsFragment()
+        }
 
         // Communicator
         communicator = activity as Communicator
 
-        workView.btn_stop.visibility = View.INVISIBLE
-        workView.btn_pause.visibility = View.INVISIBLE
-        workView.tv_countdown.visibility = View.INVISIBLE
-        workView.tv_focustext.visibility = View.INVISIBLE
+        view.btn_stop.visibility = View.INVISIBLE
+        view.btn_pause.visibility = View.INVISIBLE
+        view.tv_countdown.visibility = View.INVISIBLE
+        view.tv_focustext.visibility = View.INVISIBLE
 
-        workView.btn_startBreakNow.visibility = View.INVISIBLE
-        workView.btn_startLongBreakNow.visibility = View.INVISIBLE
+        view.btn_startBreakNow.visibility = View.INVISIBLE
+        view.btn_startLongBreakNow.visibility = View.INVISIBLE
 
         // Start Button
-        workView.btn_start.setOnClickListener {
+        view.btn_start.setOnClickListener {
 
             var timeInput = arguments?.getString("focus")
 
@@ -65,72 +80,87 @@ class WorkFragment : Fragment(){
                         tv_countdown.setText("HH:MM:SS")
 
                         // Break Button
-                        workView.btn_startBreakNow.visibility = View.VISIBLE
-                        workView.btn_startBreakNow.setOnClickListener{
+                        view.btn_startBreakNow.visibility = View.VISIBLE
+                        view.btn_startBreakNow.setOnClickListener{
                             breakTimer()
                         }
-                        workView.tv_countdown.visibility = View.INVISIBLE
-                        workView.tv_focustext.visibility = View.INVISIBLE
-                        workView.btn_stop.visibility = View.INVISIBLE
-                        workView.btn_pause.visibility = View.INVISIBLE
-                        workView.btn_breakfrag.visibility = View.INVISIBLE
+                        view.tv_countdown.visibility = View.INVISIBLE
+                        view.tv_focustext.visibility = View.INVISIBLE
+                        view.btn_stop.visibility = View.INVISIBLE
+                        view.btn_pause.visibility = View.INVISIBLE
+                        view.btn_breakfrag.visibility = View.INVISIBLE
+
+                        // Change color
+                        breakColor()
+
                     }
                 }.start()
-                workView.btn_start.visibility = View.INVISIBLE // Work Button
-                workView.tv_countdown.visibility = View.VISIBLE
-                workView.tv_focustext.visibility = View.VISIBLE
-                workView.btn_stop.visibility = View.VISIBLE
-                workView.btn_pause.visibility = View.VISIBLE
+                view.btn_start.visibility = View.INVISIBLE // Work Button
+                view.tv_countdown.visibility = View.VISIBLE
+                view.tv_focustext.visibility = View.VISIBLE
+                view.btn_stop.visibility = View.VISIBLE
+                view.btn_pause.visibility = View.VISIBLE
             }
         }
 
         // Stop Button
-        workView.btn_stop.setOnClickListener{
+        view.btn_stop.setOnClickListener{
             timer.cancel()
-            workView.btn_start.visibility = View.VISIBLE
-            workView.btn_stop.visibility = View.INVISIBLE
-            workView.tv_countdown.visibility = View.INVISIBLE
-            workView.tv_focustext.visibility = View.INVISIBLE
-            workView.btn_pause.visibility = View.INVISIBLE
+            view.btn_start.visibility = View.VISIBLE
+            view.btn_stop.visibility = View.INVISIBLE
+            view.tv_countdown.visibility = View.INVISIBLE
+            view.tv_focustext.visibility = View.INVISIBLE
+            view.btn_pause.visibility = View.INVISIBLE
         }
 
         // Take a Break Button
-        workView.btn_breakfrag.setOnClickListener{
-            workView.btn_start.visibility = View.INVISIBLE
+        view.btn_breakfrag.setOnClickListener{
+            view.btn_start.visibility = View.INVISIBLE
             btn_breakfrag.visibility = View.INVISIBLE
 
-            workView.btn_startBreakNow.visibility = View.VISIBLE
-            workView.btn_startBreakNow.setOnClickListener{
+            view.btn_startBreakNow.visibility = View.VISIBLE
+            view.btn_startBreakNow.setOnClickListener{
                 breakTimer()
             }
         }
 
-        return workView
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)  {
         super.onViewCreated(view, savedInstanceState)
 
         //Add Todo Button
-        btn_add.setOnClickListener{
-                view ->
+        btn_add.setOnClickListener{ view ->
             Log.d("btn_add", "Selected")
             saveRecord()
+
         }
         // toolbar title
         activity!!.title = ""
     }
 
-    // Navigate to Break Fragment
-    fun breakFragment() {
+    // Navigate to Settings Fragment
+    fun settingsFragment() {
+        val fragment = SettingsFragment()
+        val fragmentManager = activity!!.supportFragmentManager
 
-        val testInput1 = arguments?.getString("break")
-        val testDemo1 = testInput1.toString()
-        val testInput2 = arguments?.getString("longBreak")
-        val testDemo2 = testInput2.toString()
-
-        communicator.passBreakData(testDemo1, testDemo2)
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.container, fragment)
+        fragmentTransaction.addToBackStack(null)
+        fragmentTransaction.commit()
     }
+
+//    // Navigate to Break Fragment
+//    fun breakFragment() {
+//
+//        val testInput1 = arguments?.getString("break")
+//        val testDemo1 = testInput1.toString()
+//        val testInput2 = arguments?.getString("longBreak")
+//        val testDemo2 = testInput2.toString()
+//
+//        communicator.passBreakData(testDemo1, testDemo2)
+//    }
 
     // Short Break Timer
     fun breakTimer() {
@@ -159,10 +189,14 @@ class WorkFragment : Fragment(){
                     btn_startLongBreakNow.setOnClickListener{
                         longBreakTimer()
                     }
+
                     tv_countdown.visibility = View.INVISIBLE
                     tv_focustext.visibility = View.INVISIBLE
                     btn_stop.visibility = View.INVISIBLE
                     btn_pause.visibility = View.INVISIBLE
+
+                    // Change color
+                    longBreakColor()
                 }
             }.start()
             btn_startBreakNow.visibility = View.INVISIBLE //shortBreak button
@@ -204,6 +238,9 @@ class WorkFragment : Fragment(){
                     btn_pause.visibility = View.INVISIBLE
                     tv_focustext.setText("Focus")
                     btn_breakfrag.visibility = View.VISIBLE
+
+                    // Change color
+                    focusColor()
                 }
             }.start()
             btn_startLongBreakNow.visibility = View.INVISIBLE //longBreak button
@@ -214,6 +251,33 @@ class WorkFragment : Fragment(){
         }
     }
 
+    // Change color of break view
+    fun breakColor() {
+        myToolBar.setBackgroundColor(Color.parseColor("#99d5ca"))
+        btn_startBreakNow.setColorFilter(Color.parseColor("#99d5ca"))
+        btn_stop.setColorFilter(Color.parseColor("#99d5ca"))
+        btn_pause.setColorFilter(Color.parseColor("#99d5ca"))
+        btn_add.setColorFilter(Color.parseColor("#99d5ca"))
+    }
+
+    // Change color of long break view
+    fun longBreakColor() {
+        myToolBar.setBackgroundColor(Color.parseColor("#b391b5"))
+        btn_startLongBreakNow.setColorFilter(Color.parseColor("#b391b5"))
+        btn_stop.setColorFilter(Color.parseColor("#b391b5"))
+        btn_pause.setColorFilter(Color.parseColor("#b391b5"))
+        btn_add.setColorFilter(Color.parseColor("#b391b5"))
+    }
+
+    // Change color of long break view
+    fun focusColor() {
+        myToolBar.setBackgroundColor(Color.parseColor("#ffbbb1"))
+        btn_startBreakNow.setColorFilter(Color.parseColor("#ffbbb1"))
+        btn_stop.setColorFilter(Color.parseColor("#ffbbb1"))
+        btn_pause.setColorFilter(Color.parseColor("#ffbbb1"))
+        btn_add.setColorFilter(Color.parseColor("#ffbbb1"))
+    }
+
     fun saveRecord(){
         val title = et_task.text.toString()
         val isChecked = "false"
@@ -221,11 +285,11 @@ class WorkFragment : Fragment(){
         if(title.trim()!=""){
             val status = databaseHandler.addTodo(TodoModelClass(title, isChecked))
             if(status > -1){
-                Toast.makeText(activity?.applicationContext,"New task added", Toast.LENGTH_LONG).show()
+                Toast.makeText(activity?.applicationContext, "New task added", Toast.LENGTH_LONG).show()
                 et_task.text.clear()
             }
         }else{
-            Toast.makeText(activity?.applicationContext,"You cannot enter a blank task", Toast.LENGTH_LONG).show()
+            Toast.makeText(activity?.applicationContext, "You cannot enter a blank task", Toast.LENGTH_LONG).show()
         }
 
         viewRecord()
@@ -247,7 +311,7 @@ class WorkFragment : Fragment(){
             index++
         }
         //creating custom ArrayAdapter
-        val myListAdapter = RVTodoAdapter(activity!!,taskArrayId,taskArrayTitle,taskArrayisChecked)
+        val myListAdapter = RVTodoAdapter(activity!!, taskArrayId, taskArrayTitle, taskArrayisChecked)
         rv_todo_list.adapter = myListAdapter
         rv_todo_list.layoutManager = LinearLayoutManager(context!!)
     }

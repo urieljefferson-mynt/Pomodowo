@@ -3,6 +3,7 @@ package ph.apper.android.pagatpatan.pomodowo
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.appbar.view.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 
 
@@ -16,18 +17,24 @@ class SettingsFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        val settingsView = inflater.inflate(R.layout.fragment_settings, container, false)
+        val view = inflater.inflate(R.layout.fragment_settings, container, false)
+
+        // Action Bar Buttons
+        view.ic_menu.visibility = View.INVISIBLE
+        view.ic_arrow_back.setOnClickListener{
+            workFragment()
+        }
 
         // Communicator
         communicator = activity as Communicator
 
-        settingsView.btn_submit.setOnClickListener{
-            communicator.passWorkData(settingsView.et_focustime.text.toString(),
-                                      settingsView.et_shortbreaktime.text.toString(),
-                                      settingsView.et_longbreaktime.text.toString())
+        view.btn_submit.setOnClickListener{
+            communicator.passWorkData(view.et_focustime.text.toString(),
+                                      view.et_shortbreaktime.text.toString(),
+                                      view.et_longbreaktime.text.toString())
         }
 
-        return settingsView
+        return view
     }
 
     // Menu
@@ -57,14 +64,14 @@ class SettingsFragment : Fragment() {
 //        (activity as AppCompatActivity?)!!.supportActionBar!!.show()
 //    }
 
-//    fun workFragment() {
-//        val fragment = WorkFragment()
-//        val fragmentManager = activity!!.supportFragmentManager
-//
-//        val fragmentTransaction = fragmentManager.beginTransaction()
-//        fragmentTransaction.replace(R.id.container, fragment)
-//        fragmentTransaction.addToBackStack(null)
-//        fragmentTransaction.commit()
-//    }
+    fun workFragment() {
+        val fragment = WorkFragment()
+        val fragmentManager = activity!!.supportFragmentManager
+
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.container, fragment)
+        fragmentTransaction.addToBackStack(null)
+        fragmentTransaction.commit()
+    }
 
 }

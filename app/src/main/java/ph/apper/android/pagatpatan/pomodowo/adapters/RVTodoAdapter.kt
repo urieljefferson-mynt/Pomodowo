@@ -12,7 +12,10 @@ class RVTodoAdapter(private val context: Activity, private val id: Array<String>
     : RecyclerView.Adapter<RVTodoAdapter.TodoViewHolder>()  {
     class TodoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoViewHolder {
+
         return TodoViewHolder(
             //to get a reference to an existing view
             LayoutInflater.from(parent.context).inflate(
