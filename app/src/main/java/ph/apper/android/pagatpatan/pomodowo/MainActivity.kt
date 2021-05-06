@@ -42,66 +42,6 @@ class MainActivity : AppCompatActivity(), Communicator{
         transaction.commit()
     }
 
-    // Communicator - Short Break Fragment
-    override fun passBreakData(shortBreak: String, longBreak: String) {
-        val bundle = Bundle()
-        bundle.putString("break", shortBreak)
-        bundle.putString("longBreak", longBreak)
-
-        val transaction = this.supportFragmentManager.beginTransaction()
-        val breakFragment = BreakFragment()
-        breakFragment.arguments = bundle
-
-        transaction.replace(R.id.container, breakFragment)
-        transaction.addToBackStack(null)
-        transaction.commit()
-    }
-
-    // Communicator - Long Break Fragment
-    override fun passLongBreakData(longBreak: String) {
-        val bundle = Bundle()
-        bundle.putString("longBreak", longBreak)
-
-        val transaction = this.supportFragmentManager.beginTransaction()
-        val longBreakFragment = LongBreakFragment()
-        longBreakFragment.arguments = bundle
-
-        transaction.replace(R.id.container, longBreakFragment)
-        transaction.addToBackStack(null)
-        transaction.commit()
-    }
-
-    // Menu -> Settings Fragment
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.nav_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item?.itemId){
-            R.id.nav_settings -> {
-                val fragment = SettingsFragment.newInstance()
-                replaceFragment(fragment)
-                true
-            } R.id.nav_back -> {
-                val fragment = WorkFragment.newInstance()
-                replaceFragment(fragment)
-                true
-            } else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    private fun replaceFragment(fragment: Fragment){
-        val fragmentTransaction = supportFragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.container, fragment)
-        fragmentTransaction.commit()
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) :Boolean {
-        super.onPrepareOptionsMenu(menu)
-        menu.findItem(R.id.nav_back).setVisible(false)
-        return true
-    }
 
 
 //    override fun onClick(pressed: View?) {

@@ -28,11 +28,8 @@ class WorkFragment : Fragment(){
 
     private lateinit var communicator: Communicator
 
-    lateinit var toolbar: Toolbar
-
     companion object {
         private lateinit var timer: CountDownTimer
-        fun newInstance() = WorkFragment() // for menu
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -135,7 +132,6 @@ class WorkFragment : Fragment(){
         btn_add.setOnClickListener{ view ->
             Log.d("btn_add", "Selected")
             saveRecord()
-
         }
         // toolbar title
         activity!!.title = ""
@@ -151,17 +147,6 @@ class WorkFragment : Fragment(){
         fragmentTransaction.addToBackStack(null)
         fragmentTransaction.commit()
     }
-
-//    // Navigate to Break Fragment
-//    fun breakFragment() {
-//
-//        val testInput1 = arguments?.getString("break")
-//        val testDemo1 = testInput1.toString()
-//        val testInput2 = arguments?.getString("longBreak")
-//        val testDemo2 = testInput2.toString()
-//
-//        communicator.passBreakData(testDemo1, testDemo2)
-//    }
 
     // Short Break Timer
     fun breakTimer() {
@@ -316,7 +301,5 @@ class WorkFragment : Fragment(){
         rv_todo_list.adapter = myListAdapter
         rv_todo_list.layoutManager = LinearLayoutManager(context!!)
     }
-
-
 
 }
