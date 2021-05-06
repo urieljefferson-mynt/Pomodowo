@@ -73,6 +73,7 @@ class WorkFragment : Fragment(){
                         workView.tv_focustext.visibility = View.INVISIBLE
                         workView.btn_stop.visibility = View.INVISIBLE
                         workView.btn_pause.visibility = View.INVISIBLE
+                        workView.btn_breakfrag.visibility = View.INVISIBLE
                     }
                 }.start()
                 workView.btn_start.visibility = View.INVISIBLE // Work Button
@@ -202,6 +203,7 @@ class WorkFragment : Fragment(){
                     btn_stop.visibility = View.INVISIBLE
                     btn_pause.visibility = View.INVISIBLE
                     tv_focustext.setText("Focus")
+                    btn_breakfrag.visibility = View.VISIBLE
                 }
             }.start()
             btn_startLongBreakNow.visibility = View.INVISIBLE //longBreak button
