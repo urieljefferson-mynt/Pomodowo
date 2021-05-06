@@ -93,8 +93,14 @@ class WorkFragment : Fragment(){
             workView.btn_pause.visibility = View.INVISIBLE
         }
 
+        // Take a Break Button
         workView.btn_breakfrag.setOnClickListener{
-            breakTimer()
+            workView.btn_start.visibility = View.INVISIBLE
+
+            workView.btn_startBreakNow.visibility = View.VISIBLE
+            workView.btn_startBreakNow.setOnClickListener{
+                breakTimer()
+            }
         }
 
         return workView
