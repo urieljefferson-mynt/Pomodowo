@@ -1,3 +1,3 @@
 package com.example.todolistjeff.model
 
-class TodoModelClass (var title:String, val isChecked: String)
+data class TodoModelClass (var id: Int, var title:String, var isChecked: Boolean = false)

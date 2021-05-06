@@ -130,6 +130,7 @@ class WorkFragment : Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)  {
         super.onViewCreated(view, savedInstanceState)
 
+        viewRecord()
         //Add Todo Button
         btn_add.setOnClickListener{ view ->
             Log.d("btn_add", "Selected")
@@ -280,10 +281,10 @@ class WorkFragment : Fragment(){
 
     fun saveRecord(){
         val title = et_task.text.toString()
-        val isChecked = "false"
+        val isChecked = false
         val databaseHandler: DatabaseHandler = DatabaseHandler(context!!)
         if(title.trim()!=""){
-            val status = databaseHandler.addTodo(TodoModelClass(title, isChecked))
+            val status = databaseHandler.addTodo(TodoModelClass(id = 0, title, isChecked))
             if(status > -1){
                 Toast.makeText(activity?.applicationContext, "New task added", Toast.LENGTH_LONG).show()
                 et_task.text.clear()
@@ -300,20 +301,11 @@ class WorkFragment : Fragment(){
         //creating the instance of DatabaseHandler class
         val databaseHandler: DatabaseHandler= DatabaseHandler(context!!)
         //calling the viewEmployee method of DatabaseHandler class to read the records
-        val emp: List<TodoModelClass> = databaseHandler.viewTasks()
-        val taskArrayId = Array<String>(emp.size){"0"}
-        val taskArrayTitle = Array<String>(emp.size){"null"}
-        val taskArrayisChecked = Array<String>(emp.size){"null"}
-        var index = 0
-        for(e in emp){
-            taskArrayTitle[index] = e.title
-            taskArrayisChecked[index] = e.isChecked
-            index++
-        }
+        val emp: MutableList<TodoModelClass> = databaseHandler.viewTasks() as MutableList<TodoModelClass>
         //creating custom ArrayAdapter
-        val myListAdapter = RVTodoAdapter(activity!!, taskArrayId, taskArrayTitle, taskArrayisChecked)
+        val myListAdapter = RVTodoAdapter(activity!!, emp)
         rv_todo_list.adapter = myListAdapter
-        rv_todo_list.layoutManager = LinearLayoutManager(context!!)
+        rv_todo_list.layoutManager = LinearLayoutManager(context)
     }
 
 

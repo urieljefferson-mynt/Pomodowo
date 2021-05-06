@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 import com.example.todolistjeff.model.TodoModelClass
 
 
@@ -60,32 +61,32 @@ class DatabaseHandler(context: Context): SQLiteOpenHelper(context,DATABASE_NAME,
         }
         var id: Int
         var title: String
-        var isChecked: String
+        var isChecked: Boolean
         if (cursor.moveToFirst()) {
             do {
                 id = cursor.getInt(cursor.getColumnIndex("id"))
                 title = cursor.getString(cursor.getColumnIndex("title"))
-                isChecked = cursor.getString(cursor.getColumnIndex("isChecked"))
-                val todo= TodoModelClass(title = title, isChecked = isChecked)
+                isChecked = cursor.getString(cursor.getColumnIndex("isChecked")).toBoolean()
+                val todo= TodoModelClass(title = title, isChecked = isChecked, id = id)
                 taskList.add(todo)
             } while (cursor.moveToNext())
         }
         return taskList
     }
-//    //method to update data
-//    fun updateEmployee(emp: TodoModelClass):Int{
-//        val db = this.writableDatabase
-//        val contentValues = ContentValues()
-//        contentValues.put(KEY_ID, emp.id)
-//        contentValues.put(KEY_NAME, emp.title) // EmpModelClass Name
-//        contentValues.put(KEY_EMAIL,emp.isChecked ) // EmpModelClass Email
-//
-//        // Updating Row
-//        val success = db.update(TABLE_CONTACTS, contentValues,"id="+emp.id,null)
-//        //2nd argument is String containing nullColumnHack
-//        db.close() // Closing database connection
-//        return success
-//    }
+    //method to update data
+    fun updateTodo(emp: TodoModelClass):Int{
+        val db = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put(KEY_TITLE, emp.title) // EmpModelClass Name
+        contentValues.put(KEY_STATUS,emp.isChecked ) // EmpModelClass Email
+
+        // Updating Row
+        val success = db.update(TABLE_CONTACTS, contentValues,"id = ${emp.id}",null)
+        Log.d("UPDATING", emp.title + " " + emp.isChecked.toString())
+        //2nd argument is String containing nullColumnHack
+        db.close() // Closing database connection
+        return success
+    }
     //method to delete data
 //    fun deleteEmployee(emp: TodoModelClass):Int{
 //        val db = this.writableDatabase
