@@ -2,16 +2,22 @@ package ph.apper.android.pagatpatan.pomodowo
 
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.todolistjeff.dao.DatabaseHandler
+import com.example.todolistjeff.model.TodoModelClass
 import kotlinx.android.synthetic.main.fragment_work.*
 import kotlinx.android.synthetic.main.fragment_work.view.*
+import ph.apper.android.pagatpatan.pomodowo.adapters.RVTodoAdapter
 import java.util.concurrent.TimeUnit
 
 
-class WorkFragment : Fragment() {
+class WorkFragment : Fragment(){
 
     private lateinit var communicator: Communicator
 
@@ -26,15 +32,25 @@ class WorkFragment : Fragment() {
 
         communicator = activity as Communicator
 
+
         // Start Button
         workView.btn_stop.visibility = View.INVISIBLE
+        workView.btn_pause.visibility = View.INVISIBLE
         workView.tv_countdown.visibility = View.INVISIBLE
         workView.tv_focustext.visibility = View.INVISIBLE
         workView.btn_start.setOnClickListener {
 
             // Communicator
-            val timeInput = arguments?.getString("focus")
-            val timeStart = timeInput.toString()
+
+            var timeInput = arguments?.getString("message")
+
+            if(timeInput.isNullOrBlank()){
+                //App crashes if not initiated with DEFAULT VALUE
+                timeInput = "1500"
+                Log.d("TIMESTART", timeInput)
+            }
+
+            var timeStart = timeInput.toString()
 
             // CountDownTimer
             timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
@@ -55,6 +71,7 @@ class WorkFragment : Fragment() {
             workView.tv_countdown.visibility = View.VISIBLE
             workView.tv_focustext.visibility = View.VISIBLE
             workView.btn_stop.visibility = View.VISIBLE
+            workView.btn_pause.visibility = View.VISIBLE
         }
 
         // Stop Button
@@ -64,6 +81,7 @@ class WorkFragment : Fragment() {
             workView.btn_stop.visibility = View.INVISIBLE
             workView.tv_countdown.visibility = View.INVISIBLE
             workView.tv_focustext.visibility = View.INVISIBLE
+            workView.btn_pause.visibility = View.INVISIBLE
         }
 
         workView.btn_breakfrag.setOnClickListener{
@@ -73,8 +91,15 @@ class WorkFragment : Fragment() {
         return workView
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?)  {
         super.onViewCreated(view, savedInstanceState)
+
+        //Add Todo Button
+        btn_add.setOnClickListener{
+                view ->
+            Log.d("btn_add", "Selected")
+            saveRecord()
+        }
         // toolbar title
         activity!!.title = ""
     }
@@ -102,6 +127,45 @@ class WorkFragment : Fragment() {
         communicator.passBreakData(testDemo1, testDemo2)
 
     }
+
+    fun saveRecord(){
+        val title = et_task.text.toString()
+        val isChecked = "false"
+        val databaseHandler: DatabaseHandler = DatabaseHandler(context!!)
+        if(title.trim()!=""){
+            val status = databaseHandler.addTodo(TodoModelClass(title, isChecked))
+            if(status > -1){
+                Toast.makeText(activity?.applicationContext,"New task added", Toast.LENGTH_LONG).show()
+                et_task.text.clear()
+            }
+        }else{
+            Toast.makeText(activity?.applicationContext,"You cannot enter a blank task", Toast.LENGTH_LONG).show()
+        }
+
+        viewRecord()
+
+    }
+    //method for read records from database in ListView
+    fun viewRecord(){
+        //creating the instance of DatabaseHandler class
+        val databaseHandler: DatabaseHandler= DatabaseHandler(context!!)
+        //calling the viewEmployee method of DatabaseHandler class to read the records
+        val emp: List<TodoModelClass> = databaseHandler.viewTasks()
+        val taskArrayId = Array<String>(emp.size){"0"}
+        val taskArrayTitle = Array<String>(emp.size){"null"}
+        val taskArrayisChecked = Array<String>(emp.size){"null"}
+        var index = 0
+        for(e in emp){
+            taskArrayTitle[index] = e.title
+            taskArrayisChecked[index] = e.isChecked
+            index++
+        }
+        //creating custom ArrayAdapter
+        val myListAdapter = RVTodoAdapter(activity!!,taskArrayId,taskArrayTitle,taskArrayisChecked)
+        rv_todo_list.adapter = myListAdapter
+        rv_todo_list.layoutManager = LinearLayoutManager(context!!)
+    }
+
 
 
 }
