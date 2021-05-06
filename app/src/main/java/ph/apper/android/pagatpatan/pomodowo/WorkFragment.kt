@@ -47,7 +47,7 @@ class WorkFragment : Fragment(){
             var timeInput = arguments?.getString("focus")
 
             if (timeInput.isNullOrBlank()) {
-                Toast.makeText(context, "Set a time first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Set a focus time first", Toast.LENGTH_SHORT).show()
             } else {
 
                 var timeStart = timeInput.toString()
@@ -96,6 +96,7 @@ class WorkFragment : Fragment(){
         // Take a Break Button
         workView.btn_breakfrag.setOnClickListener{
             workView.btn_start.visibility = View.INVISIBLE
+            btn_breakfrag.visibility = View.INVISIBLE
 
             workView.btn_startBreakNow.visibility = View.VISIBLE
             workView.btn_startBreakNow.setOnClickListener{
@@ -138,7 +139,7 @@ class WorkFragment : Fragment(){
         tv_focustext.setText("Break")
 
         if (timeInput.isNullOrBlank()) {
-            Toast.makeText(context, "Set a time first", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Set a break time first", Toast.LENGTH_SHORT).show()
         } else {
 
             // CountDownTimer
@@ -179,7 +180,7 @@ class WorkFragment : Fragment(){
         tv_focustext.setText("Long Break")
 
         if (timeInput.isNullOrBlank()) {
-            Toast.makeText(context, "Set a time first", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Set a long break time first", Toast.LENGTH_SHORT).show()
         } else {
 
             // CountDownTimer
