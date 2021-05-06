@@ -8,8 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import android.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todolistjeff.dao.DatabaseHandler
@@ -18,8 +16,6 @@ import kotlinx.android.synthetic.main.appbar.*
 import kotlinx.android.synthetic.main.appbar.view.*
 import kotlinx.android.synthetic.main.fragment_work.*
 import kotlinx.android.synthetic.main.fragment_work.view.*
-import kotlinx.android.synthetic.main.todo_view.*
-import kotlinx.android.synthetic.main.todo_view.view.*
 import ph.apper.android.pagatpatan.pomodowo.adapters.RVTodoAdapter
 import java.util.concurrent.TimeUnit
 
@@ -30,6 +26,7 @@ class WorkFragment : Fragment(){
 
     companion object {
         private lateinit var timer: CountDownTimer
+        private var currentTime : Long = 0
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -52,6 +49,7 @@ class WorkFragment : Fragment(){
 
         view.btn_startBreakNow.visibility = View.INVISIBLE
         view.btn_startLongBreakNow.visibility = View.INVISIBLE
+        view.btn_startPause.visibility = View.INVISIBLE
 
         // Start Button
         view.btn_start.setOnClickListener {
@@ -67,6 +65,7 @@ class WorkFragment : Fragment(){
                 // CountDownTimer
                 timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
                     override fun onTick(millisUntilFinished: Long) {
+                        currentTime = millisUntilFinished
                         tv_countdown.setText("" + String.format("%d:%d:%d",
                                 TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                                 TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
@@ -108,6 +107,51 @@ class WorkFragment : Fragment(){
             view.tv_countdown.visibility = View.INVISIBLE
             view.tv_focustext.visibility = View.INVISIBLE
             view.btn_pause.visibility = View.INVISIBLE
+        }
+
+        // Pause Button
+        view.btn_pause.setOnClickListener{
+            timer.cancel()
+            view.btn_pause.visibility = View.INVISIBLE
+            view.btn_startPause.visibility = View.VISIBLE
+
+        }
+
+        // Focus Start-Pause Button
+        view.btn_startPause.setOnClickListener {
+
+            view.btn_pause.visibility = View.VISIBLE
+            view.btn_startPause.visibility = View.INVISIBLE
+
+            // CountDownTimer
+            timer = object : CountDownTimer(currentTime*1, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                    currentTime = millisUntilFinished
+                    tv_countdown.setText("" + String.format("%d:%d:%d",
+                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
+                }
+
+                override fun onFinish() {
+                    cancel()
+                    tv_countdown.setText("HH:MM:SS")
+
+                    // Break Button
+                    view.btn_startBreakNow.visibility = View.VISIBLE
+                    view.btn_startBreakNow.setOnClickListener{
+                        breakTimer()
+                    }
+                    view.tv_countdown.visibility = View.INVISIBLE
+                    view.tv_focustext.visibility = View.INVISIBLE
+                    view.btn_stop.visibility = View.INVISIBLE
+                    view.btn_pause.visibility = View.INVISIBLE
+                    view.btn_breakfrag.visibility = View.INVISIBLE
+
+                    // Change color
+                    breakColor()
+                }
+            }.start()
         }
 
         // Take a Break Button
@@ -162,6 +206,7 @@ class WorkFragment : Fragment(){
             // CountDownTimer
             timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
+                    currentTime = millisUntilFinished
                     tv_countdown.setText("" + String.format("%d:%d:%d",
                             TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                             TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
@@ -190,7 +235,45 @@ class WorkFragment : Fragment(){
             tv_focustext.visibility = View.VISIBLE
             btn_stop.visibility = View.VISIBLE
             btn_pause.visibility = View.VISIBLE
+            btn_startPause.setColorFilter(Color.parseColor("#99d5ca"))
         }
+
+        // Break Start-Pause Button
+        btn_startPause.setOnClickListener {
+
+            btn_pause.visibility = View.VISIBLE
+            btn_startPause.visibility = View.INVISIBLE
+
+            // CountDownTimer
+            timer = object : CountDownTimer(currentTime*1, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                    currentTime = millisUntilFinished
+                    tv_countdown.setText("" + String.format("%d:%d:%d",
+                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
+                }
+
+                override fun onFinish() {
+                    cancel()
+                    tv_countdown.setText("HH:MM:SS")
+
+                    btn_startLongBreakNow.visibility = View.VISIBLE
+                    btn_startLongBreakNow.setOnClickListener{
+                        longBreakTimer()
+                    }
+
+                    tv_countdown.visibility = View.INVISIBLE
+                    tv_focustext.visibility = View.INVISIBLE
+                    btn_stop.visibility = View.INVISIBLE
+                    btn_pause.visibility = View.INVISIBLE
+
+                    // Change color
+                    longBreakColor()
+                }
+            }.start()
+        }
+
     }
 
     // Long Break Timer
@@ -207,6 +290,7 @@ class WorkFragment : Fragment(){
             // CountDownTimer
             timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
+                    currentTime = millisUntilFinished
                     tv_countdown.setText("" + String.format("%d:%d:%d",
                             TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                             TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
@@ -234,6 +318,42 @@ class WorkFragment : Fragment(){
             tv_focustext.visibility = View.VISIBLE
             btn_stop.visibility = View.VISIBLE
             btn_pause.visibility = View.VISIBLE
+            btn_startPause.setColorFilter(Color.parseColor("#b391b5"))
+        }
+
+        // Long Break Start-Pause Button
+        btn_startPause.setOnClickListener {
+
+            btn_pause.visibility = View.VISIBLE
+            btn_startPause.visibility = View.INVISIBLE
+
+            // CountDownTimer
+            timer = object : CountDownTimer(currentTime*1, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                    currentTime = millisUntilFinished
+                    tv_countdown.setText("" + String.format("%d:%d:%d",
+                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
+                }
+
+                override fun onFinish() {
+                    cancel()
+                    tv_countdown.setText("HH:MM:SS")
+
+                    btn_start.visibility = View.VISIBLE
+
+                    tv_countdown.visibility = View.INVISIBLE
+                    tv_focustext.visibility = View.INVISIBLE
+                    btn_stop.visibility = View.INVISIBLE
+                    btn_pause.visibility = View.INVISIBLE
+                    tv_focustext.setText("Focus")
+                    btn_breakfrag.visibility = View.VISIBLE
+
+                    // Change color
+                    focusColor()
+                }
+            }.start()
         }
     }
 
@@ -262,6 +382,7 @@ class WorkFragment : Fragment(){
         btn_stop.setColorFilter(Color.parseColor("#ffbbb1"))
         btn_pause.setColorFilter(Color.parseColor("#ffbbb1"))
         btn_add.setColorFilter(Color.parseColor("#ffbbb1"))
+        btn_startPause.setColorFilter(Color.parseColor("#ffbbb1"))
     }
 
     fun saveRecord(){
