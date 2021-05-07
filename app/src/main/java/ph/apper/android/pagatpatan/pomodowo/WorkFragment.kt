@@ -508,6 +508,8 @@ class WorkFragment : Fragment(){
             Log.d("Toggle", FinishedTasks.CHECKED_OFF_TASKS.toString())
             Log.d("Toggle", FinishedTasks.REQUIRED_TASKS.toString())
             LONG_BREAK_ELIGIBLE = true
+        }else{
+            LONG_BREAK_ELIGIBLE = false
         }
         Log.d("Toggle", LONG_BREAK_ELIGIBLE.toString())
 
