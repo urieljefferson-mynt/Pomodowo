@@ -45,7 +45,7 @@ class WorkFragment : Fragment(){
         view.btn_stop.visibility = View.INVISIBLE
         view.btn_pause.visibility = View.INVISIBLE
         view.tv_countdown.visibility = View.INVISIBLE
-        view.tv_focustext.visibility = View.INVISIBLE
+        view.tv_workText.visibility = View.INVISIBLE
 
         view.btn_startBreakNow.visibility = View.INVISIBLE
         view.btn_startLongBreakNow.visibility = View.INVISIBLE
@@ -81,10 +81,10 @@ class WorkFragment : Fragment(){
                             breakTimer()
                         }
                         view.tv_countdown.visibility = View.INVISIBLE
-                        view.tv_focustext.visibility = View.INVISIBLE
+                        view.tv_workText.visibility = View.INVISIBLE
                         view.btn_stop.visibility = View.INVISIBLE
                         view.btn_pause.visibility = View.INVISIBLE
-                        view.btn_breakfrag.visibility = View.INVISIBLE
+                        view.btn_break.visibility = View.INVISIBLE
 
                         // Change color
                         breakColor()
@@ -93,7 +93,7 @@ class WorkFragment : Fragment(){
                 }.start()
                 view.btn_start.visibility = View.INVISIBLE // Work Button
                 view.tv_countdown.visibility = View.VISIBLE
-                view.tv_focustext.visibility = View.VISIBLE
+                view.tv_workText.visibility = View.VISIBLE
                 view.btn_stop.visibility = View.VISIBLE
                 view.btn_pause.visibility = View.VISIBLE
             }
@@ -105,7 +105,7 @@ class WorkFragment : Fragment(){
             view.btn_start.visibility = View.VISIBLE
             view.btn_stop.visibility = View.INVISIBLE
             view.tv_countdown.visibility = View.INVISIBLE
-            view.tv_focustext.visibility = View.INVISIBLE
+            view.tv_workText.visibility = View.INVISIBLE
             view.btn_pause.visibility = View.INVISIBLE
         }
 
@@ -143,10 +143,10 @@ class WorkFragment : Fragment(){
                         breakTimer()
                     }
                     view.tv_countdown.visibility = View.INVISIBLE
-                    view.tv_focustext.visibility = View.INVISIBLE
+                    view.tv_workText.visibility = View.INVISIBLE
                     view.btn_stop.visibility = View.INVISIBLE
                     view.btn_pause.visibility = View.INVISIBLE
-                    view.btn_breakfrag.visibility = View.INVISIBLE
+                    view.btn_break.visibility = View.INVISIBLE
 
                     // Change color
                     breakColor()
@@ -155,9 +155,10 @@ class WorkFragment : Fragment(){
         }
 
         // Take a Break Button
-        view.btn_breakfrag.setOnClickListener{
+        view.btn_break.setOnClickListener{
             view.btn_start.visibility = View.INVISIBLE
-            btn_breakfrag.visibility = View.INVISIBLE
+            btn_break.visibility = View.INVISIBLE
+            breakColor()
 
             view.btn_startBreakNow.visibility = View.VISIBLE
             view.btn_startBreakNow.setOnClickListener{
@@ -197,7 +198,7 @@ class WorkFragment : Fragment(){
 
         var timeInput = arguments?.getString("break")
         var timeStart = timeInput.toString()
-        tv_focustext.setText("Break")
+        tv_workText.setText("Break")
 
         if (timeInput.isNullOrBlank()) {
             Toast.makeText(context, "Set a break time first", Toast.LENGTH_SHORT).show()
@@ -222,7 +223,7 @@ class WorkFragment : Fragment(){
                     }
 
                     tv_countdown.visibility = View.INVISIBLE
-                    tv_focustext.visibility = View.INVISIBLE
+                    tv_workText.visibility = View.INVISIBLE
                     btn_stop.visibility = View.INVISIBLE
                     btn_pause.visibility = View.INVISIBLE
 
@@ -232,7 +233,7 @@ class WorkFragment : Fragment(){
             }.start()
             btn_startBreakNow.visibility = View.INVISIBLE //shortBreak button
             tv_countdown.visibility = View.VISIBLE
-            tv_focustext.visibility = View.VISIBLE
+            tv_workText.visibility = View.VISIBLE
             btn_stop.visibility = View.VISIBLE
             btn_pause.visibility = View.VISIBLE
             btn_startPause.setColorFilter(Color.parseColor("#99d5ca"))
@@ -264,7 +265,7 @@ class WorkFragment : Fragment(){
                     }
 
                     tv_countdown.visibility = View.INVISIBLE
-                    tv_focustext.visibility = View.INVISIBLE
+                    tv_workText.visibility = View.INVISIBLE
                     btn_stop.visibility = View.INVISIBLE
                     btn_pause.visibility = View.INVISIBLE
 
@@ -281,7 +282,7 @@ class WorkFragment : Fragment(){
 
         var timeInput = arguments?.getString("longBreak")
         var timeStart = timeInput.toString()
-        tv_focustext.setText("Long Break")
+        tv_workText.setText("Long Break")
 
         if (timeInput.isNullOrBlank()) {
             Toast.makeText(context, "Set a long break time first", Toast.LENGTH_SHORT).show()
@@ -303,11 +304,11 @@ class WorkFragment : Fragment(){
                     btn_start.visibility = View.VISIBLE
 
                     tv_countdown.visibility = View.INVISIBLE
-                    tv_focustext.visibility = View.INVISIBLE
+                    tv_workText.visibility = View.INVISIBLE
                     btn_stop.visibility = View.INVISIBLE
                     btn_pause.visibility = View.INVISIBLE
-                    tv_focustext.setText("Focus")
-                    btn_breakfrag.visibility = View.VISIBLE
+                    tv_workText.setText("Focus")
+                    btn_break.visibility = View.VISIBLE
 
                     // Change color
                     focusColor()
@@ -315,7 +316,7 @@ class WorkFragment : Fragment(){
             }.start()
             btn_startLongBreakNow.visibility = View.INVISIBLE //longBreak button
             tv_countdown.visibility = View.VISIBLE
-            tv_focustext.visibility = View.VISIBLE
+            tv_workText.visibility = View.VISIBLE
             btn_stop.visibility = View.VISIBLE
             btn_pause.visibility = View.VISIBLE
             btn_startPause.setColorFilter(Color.parseColor("#b391b5"))
@@ -344,11 +345,11 @@ class WorkFragment : Fragment(){
                     btn_start.visibility = View.VISIBLE
 
                     tv_countdown.visibility = View.INVISIBLE
-                    tv_focustext.visibility = View.INVISIBLE
+                    tv_workText.visibility = View.INVISIBLE
                     btn_stop.visibility = View.INVISIBLE
                     btn_pause.visibility = View.INVISIBLE
-                    tv_focustext.setText("Focus")
-                    btn_breakfrag.visibility = View.VISIBLE
+                    tv_workText.setText("Focus")
+                    btn_break.visibility = View.VISIBLE
 
                     // Change color
                     focusColor()
@@ -422,5 +423,7 @@ class WorkFragment : Fragment(){
         rv_todo_list.adapter = myListAdapter
         rv_todo_list.layoutManager = LinearLayoutManager(context!!)
     }
+
+    // Buttons Visibility
 
 }

@@ -6,8 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".WorkFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-
     <include
         layout="@layout/appbar"/>
 
@@ -23,12 +21,11 @@
         app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-
         app:layout_constraintTop_toTopOf="parent"
         tools:text="HH:MM:SS" />
 
     <TextView
-        android:id="@+id/tv_focustext"
+        android:id="@+id/tv_workText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -175,12 +172,12 @@
 
 
     <Button
-        android:id="@+id/btn_breakfrag"
+        android:id="@+id/btn_break"
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="#0000ff00"
-        android:text="take a break?"
+        android:text="Take A Break?"
         android:textAllCaps="false"
         android:textColor="#687980"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
