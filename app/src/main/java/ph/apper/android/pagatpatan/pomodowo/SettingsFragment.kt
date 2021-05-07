@@ -31,7 +31,8 @@ class SettingsFragment : Fragment() {
         view.btn_submit.setOnClickListener{
             communicator.passWorkData(view.et_focustime.text.toString(),
                                       view.et_shortbreaktime.text.toString(),
-                                      view.et_longbreaktime.text.toString())
+                                      view.et_longbreaktime.text.toString(),
+                                      view.et_tasks.text.toString())
         }
 
         return view

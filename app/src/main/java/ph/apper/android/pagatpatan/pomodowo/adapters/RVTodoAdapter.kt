@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.todolistjeff.dao.DatabaseHandler
 import com.example.todolistjeff.model.TodoModelClass
 import kotlinx.android.synthetic.main.todo_view.view.*
+import ph.apper.android.pagatpatan.pomodowo.FinishedTasks
 import ph.apper.android.pagatpatan.pomodowo.R
 
 
@@ -20,7 +21,6 @@ class RVTodoAdapter(private val context: Activity, private var todos: MutableLis
     private lateinit var updatedTodo : TodoModelClass
     val databaseHandler: DatabaseHandler = DatabaseHandler(context)
     class TodoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
-
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoViewHolder {
@@ -75,26 +75,52 @@ class RVTodoAdapter(private val context: Activity, private var todos: MutableLis
             var updatedTodoid = todo.id
             updatedTodo = TodoModelClass(updatedTodoid, updatedTodotitle, updatedTodoisChecked)
 
+//            if(cb_done.isChecked){
+//                FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS + 1
+//                Log.d("ISCHECKED?", FinishedTasks.CHECKED_OFF_TASKS.toString())
+//            }
+
             toggleColorChange(tv_todo_title, todo.isChecked, updatedTodo)
 
             cb_done.setTag(todo)
 
-            cb_done.setOnCheckedChangeListener() { _, isChecked ->
+//            cb_done.setOnCheckedChangeListener() { _, isChecked ->
+//                todo.isChecked = !todo.isChecked
+////                updatedTodo.isChecked = !updatedTodo.isChecked
+//                toggleColorChange(tv_todo_title, isChecked, updatedTodo)
+//                Log.d("TODO ISCHECKED", todo.isChecked.toString())
+//                if(cb_done.isChecked){
+//                    FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS + 1
+//                    Log.d("ISCHECKED?", FinishedTasks.CHECKED_OFF_TASKS.toString())
+//                } else {
+//                        FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS - 1
+//                        Log.d("ISCHECKED?", FinishedTasks.CHECKED_OFF_TASKS.toString())
+//                }
+//
+//            }
+
+            cb_done.setOnClickListener { v ->
+                cb_done.setTag(todo)
                 todo.isChecked = !todo.isChecked
-//                updatedTodo.isChecked = !updatedTodo.isChecked
-                toggleColorChange(tv_todo_title, isChecked, updatedTodo)
+//              updatedTodo.isChecked = !updatedTodo.isChecked
+                toggleColorChange(tv_todo_title, todo.isChecked, updatedTodo)
                 Log.d("TODO ISCHECKED", todo.isChecked.toString())
 
-            }
-
-            cb_done.setOnClickListener(View.OnClickListener { v ->
-                cb_done.setTag(todo)
+                if (cb_done.isChecked) {
+                    FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS + 1
+                    Log.d("ISCHECKED?", FinishedTasks.CHECKED_OFF_TASKS.toString())
+                } else {
+                    FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS - 1
+                    Log.d("ISCHECKED?", FinishedTasks.CHECKED_OFF_TASKS.toString())
+                }
                 val cb = v as CheckBox
-                val updatedTodo : TodoModelClass = cb.tag as TodoModelClass
+                val updatedTodo: TodoModelClass = cb.tag as TodoModelClass
                 databaseHandler.updateTodo(updatedTodo)
+//                FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS + 1
 
-            })
+            }
         }
+        Log.d("ISCHECKED?", FinishedTasks.CHECKED_OFF_TASKS.toString())
     }
 
     override fun getItemCount(): Int {
