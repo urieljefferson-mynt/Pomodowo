@@ -159,22 +159,43 @@ class WorkFragment : Fragment(){
                 }
 
                 override fun onFinish() {
+                    longBreakEligibilityToggle()
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
 
-                    // Break Button
-                    view.btn_startBreakNow.visibility = View.VISIBLE
-                    view.btn_startBreakNow.setOnClickListener{
-                        breakTimer()
-                    }
-                    view.tv_countdown.visibility = View.INVISIBLE
-                    view.tv_workText.visibility = View.INVISIBLE
-                    view.btn_stop.visibility = View.INVISIBLE
-                    view.btn_pause.visibility = View.INVISIBLE
-                    view.btn_break.visibility = View.INVISIBLE
+                    if(LONG_BREAK_ELIGIBLE) {
+                        view.btn_startLongBreakNow.setOnClickListener {
+                            SESSION_TYPE = SessionType.LONG_BREAK
+                            longBreakTimer()
+                        }
 
-                    // Change color
-                    breakColor()
+                        view.btn_startLongBreakNow.visibility = View.VISIBLE
+                        view.tv_countdown.visibility = View.INVISIBLE
+                        view.tv_workText.visibility = View.INVISIBLE
+                        view.btn_stop.visibility = View.INVISIBLE
+                        view.btn_pause.visibility = View.INVISIBLE
+//                            view.btn_break.visibility = View.INVISIBLE
+
+                        // Change color
+                        longBreakColor()
+                    }else{
+                        //SHORT BREAK
+                        view.btn_startBreakNow.setOnClickListener {
+                            SESSION_TYPE = SessionType.BREAK
+                            view.btn_startBreakNow.visibility = View.VISIBLE
+                            breakTimer()
+
+                        }
+                        view.btn_startBreakNow.visibility = View.VISIBLE
+                        view.tv_countdown.visibility = View.INVISIBLE
+                        view.tv_workText.visibility = View.INVISIBLE
+                        view.btn_stop.visibility = View.INVISIBLE
+                        view.btn_pause.visibility = View.INVISIBLE
+//                            view.btn_break.visibility = View.INVISIBLE
+
+                        // Change color
+                        breakColor()
+                    }
                 }
             }.start()
         }
@@ -248,7 +269,9 @@ class WorkFragment : Fragment(){
 
                 // CountDownTimer
                 timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
+
                     override fun onTick(millisUntilFinished: Long) {
+                        currentTime = millisUntilFinished
                         tv_countdown.setText("" + String.format("%d:%d:%d",
                             TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                             TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
@@ -276,7 +299,7 @@ class WorkFragment : Fragment(){
                             tv_workText.visibility = View.INVISIBLE
                             btn_stop.visibility = View.INVISIBLE
                             btn_pause.visibility = View.INVISIBLE
-                            btn_break.visibility = View.INVISIBLE
+//                            btn_break.visibility = View.INVISIBLE
 
                             // Change color
 
@@ -297,7 +320,7 @@ class WorkFragment : Fragment(){
                             tv_workText.visibility = View.INVISIBLE
                             btn_stop.visibility = View.INVISIBLE
                             btn_pause.visibility = View.INVISIBLE
-                            btn_break.visibility = View.INVISIBLE
+//                            btn_break.visibility = View.INVISIBLE
 
                             // Change color
 
@@ -323,24 +346,71 @@ class WorkFragment : Fragment(){
             btn_pause.visibility = View.INVISIBLE
         }
 
-        // Take a Break Button
-        btn_break.setOnClickListener{
-            btn_start.visibility = View.INVISIBLE
-            btn_break.visibility = View.INVISIBLE
-            longBreakEligibilityToggle()
+        view?.btn_pause?.setOnClickListener{
+            timer.cancel()
+            view?.btn_pause?.visibility = View.INVISIBLE
+            view?.btn_startPause?.visibility = View.VISIBLE
 
-            if(LONG_BREAK_ELIGIBLE){
-                btn_startLongBreakNow.visibility - View.VISIBLE
-                btn_startLongBreakNow.setOnClickListener{
-                    longBreakTimer()
-                }
-            }else {
-                btn_startBreakNow.visibility = View.VISIBLE
-                btn_startBreakNow.setOnClickListener {
-                    breakTimer()
-                }
-            }
         }
+
+        // Focus Start-Pause Button
+        view?.btn_startPause?.setOnClickListener {
+            longBreakEligibilityToggle()
+            view?.btn_pause?.visibility = View.VISIBLE
+            view?.btn_startPause?.visibility = View.INVISIBLE
+
+            // CountDownTimer
+            timer = object : CountDownTimer(currentTime*1, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                    currentTime = millisUntilFinished
+                    tv_countdown.setText("" + String.format("%d:%d:%d",
+                        TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
+                }
+
+                override fun onFinish() {
+                    cancel()
+                    tv_countdown.setText("HH:MM:SS")
+
+                    if(LONG_BREAK_ELIGIBLE) {
+                        view?.btn_startLongBreakNow?.setOnClickListener {
+                            SESSION_TYPE = SessionType.LONG_BREAK
+                            longBreakTimer()
+                        }
+
+                        view?.btn_startLongBreakNow?.visibility = View.VISIBLE
+                        view?.tv_countdown?.visibility = View.INVISIBLE
+                        view?.tv_workText?.visibility = View.INVISIBLE
+                        view?.btn_stop?.visibility = View.INVISIBLE
+                        view?.btn_pause?.visibility = View.INVISIBLE
+//                            view.btn_break.visibility = View.INVISIBLE
+
+                        // Change color
+                        longBreakColor()
+                    }else{
+                        //SHORT BREAK
+                        view?.btn_startBreakNow?.setOnClickListener {
+                            SESSION_TYPE = SessionType.BREAK
+                            view?.btn_startBreakNow?.visibility = View.VISIBLE
+                            breakTimer()
+
+                        }
+                        view?.btn_startBreakNow?.visibility = View.VISIBLE
+                        view?.tv_countdown?.visibility = View.INVISIBLE
+                        view?.tv_workText?.visibility = View.INVISIBLE
+                        view?.btn_stop?.visibility = View.INVISIBLE
+                        view?.btn_pause?.visibility = View.INVISIBLE
+//                            view.btn_break.visibility = View.INVISIBLE
+
+                        // Change color
+                        breakColor()
+                    }
+                }
+            }.start()
+        }
+
+
     }
 
     // Short Break Timer
@@ -409,18 +479,20 @@ class WorkFragment : Fragment(){
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
 
-                    btn_startLongBreakNow.visibility = View.VISIBLE
-                    btn_startLongBreakNow.setOnClickListener{
-                        longBreakTimer()
-                    }
+
+                    btn_start.visibility = View.VISIBLE
 
                     tv_countdown.visibility = View.INVISIBLE
                     tv_workText.visibility = View.INVISIBLE
                     btn_stop.visibility = View.INVISIBLE
                     btn_pause.visibility = View.INVISIBLE
+                    tv_workText.setText("Focus")
+//                    btn_breakfrag.visibility = View.VISIBLE
 
                     // Change color
-                    longBreakColor()
+                    focusColor()
+                    workTimer()
+
                 }
             }.start()
         }
@@ -452,6 +524,7 @@ class WorkFragment : Fragment(){
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
 
+                    Log.d("TASK REQ: ", checkedTaskRequirement.toString())
 //                   Reset number of finished tasks back to zero
                     FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS - (checkedTaskRequirement?.toInt()?: 0)
                     longBreakEligibilityToggle()
@@ -496,6 +569,7 @@ class WorkFragment : Fragment(){
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
 
+
                     btn_start.visibility = View.VISIBLE
 
                     tv_countdown.visibility = View.INVISIBLE
@@ -503,10 +577,14 @@ class WorkFragment : Fragment(){
                     btn_stop.visibility = View.INVISIBLE
                     btn_pause.visibility = View.INVISIBLE
                     tv_workText.setText("Focus")
-                    btn_break.visibility = View.VISIBLE
 
-                    // Change color
+                    FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS - (checkedTaskRequirement?.toInt()?: 0)
+                    longBreakEligibilityToggle()
+                    Log.d("LONGBREAKDONETASKS", FinishedTasks.CHECKED_OFF_TASKS.toString())
+                    Log.d("LB -ELIGIBILITY?", LONG_BREAK_ELIGIBLE.toString())
+
                     focusColor()
+                    workTimer()
                 }
             }.start()
         }
