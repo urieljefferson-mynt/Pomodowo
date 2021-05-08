@@ -26,16 +26,27 @@
             android:layout_centerHorizontal="true"
             android:textColor="@color/black"/>
 
-        <EditText
-            android:id="@+id/et_focustime"
+        <TextView
+            android:id="@+id/tv_focusDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50"
+            android:textSize="20sp"
+            android:layout_marginTop="35dp"
+            android:layout_centerHorizontal="true"/>
+
+        <SeekBar
+            android:id="@+id/sb_focus"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:hint="Focus Time in Seconds"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:background="#E8E8E8"
-            android:layout_marginTop="25dp"
-            android:inputType="number"/>
+            android:layout_height="wrap_content"
+            android:theme="@style/SeekBarColor"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="70dp"
+            android:layout_marginEnd="20dp"
+            android:max="100"
+            android:min="0"
+            android:progress="50" />
+
 
     </RelativeLayout>
 
@@ -53,16 +64,26 @@
             android:layout_centerHorizontal="true"
             android:textColor="@color/black"/>
 
-        <EditText
-            android:id="@+id/et_shortbreaktime"
+        <TextView
+            android:id="@+id/tv_breakDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50"
+            android:textSize="20sp"
+            android:layout_marginTop="35dp"
+            android:layout_centerHorizontal="true"/>
+
+        <SeekBar
+            android:id="@+id/sb_break"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:hint="Break Time in Seconds"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:background="#E8E8E8"
-            android:layout_marginTop="25dp"
-            android:inputType="number"/>
+            android:layout_height="wrap_content"
+            android:theme="@style/SeekBarColor"
+            android:max="100"
+            android:min="0"
+            android:progress="50"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="70dp"/>
 
     </RelativeLayout>
 
@@ -80,16 +101,26 @@
             android:layout_centerHorizontal="true"
             android:textColor="@color/black"/>
 
-        <EditText
-            android:id="@+id/et_longbreaktime"
+        <TextView
+            android:id="@+id/tv_longBreakDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50"
+            android:textSize="20sp"
+            android:layout_marginTop="35dp"
+            android:layout_centerHorizontal="true"/>
+
+        <SeekBar
+            android:id="@+id/sb_longBreak"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:hint="Long Break Time in Seconds"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:background="#E8E8E8"
-            android:layout_marginTop="25dp"
-            android:inputType="number"/>
+            android:layout_height="wrap_content"
+            android:theme="@style/SeekBarColor"
+            android:max="100"
+            android:min="0"
+            android:progress="50"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="70dp"/>
 
     </RelativeLayout>
 
@@ -107,16 +138,26 @@
             android:layout_centerHorizontal="true"
             android:textColor="@color/black"/>
 
-        <EditText
-            android:id="@+id/et_tasks"
+        <TextView
+            android:id="@+id/tv_completeTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5"
+            android:textSize="20sp"
+            android:layout_marginTop="35dp"
+            android:layout_centerHorizontal="true"/>
+
+        <SeekBar
+            android:id="@+id/sb_completeTask"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:hint="Required Tasks"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:background="#E8E8E8"
-            android:layout_marginTop="25dp"
-            android:inputType="number"/>
+            android:layout_height="wrap_content"
+            android:theme="@style/SeekBarColor"
+            android:max="10"
+            android:min="0"
+            android:progress="5"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="70dp"/>
 
     </RelativeLayout>
 

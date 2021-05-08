@@ -6,8 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".WorkFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-
     <include
         layout="@layout/appbar"/>
 
@@ -23,12 +21,11 @@
         app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-
         app:layout_constraintTop_toTopOf="parent"
         tools:text="HH:MM:SS" />
 
     <TextView
-        android:id="@+id/tv_focustext"
+        android:id="@+id/tv_workText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -46,6 +43,21 @@
         android:backgroundTint="#0000ff00"
         android:gravity="center"
         android:src="@drawable/ic_pause"
+        android:tint="@color/focus"
+        app:iconGravity="textStart"
+        app:layout_constraintBottom_toTopOf="@id/guideline2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.95"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btn_startPause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#0000ff00"
+        android:gravity="center"
+        android:src="@drawable/ic_play"
         android:tint="@color/focus"
         app:iconGravity="textStart"
         app:layout_constraintBottom_toTopOf="@id/guideline2"
@@ -159,17 +171,17 @@
         tools:layout_editor_absoluteX="0dp" />
 
 
-    <Button
-        android:id="@+id/btn_breakfrag"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#0000ff00"
-        android:text="take a break?"
-        android:textAllCaps="false"
-        android:textColor="#687980"
-        app:layout_constraintBottom_toTopOf="@+id/guideline2"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:ignore="MissingConstraints" />
+<!--    <Button-->
+<!--        android:id="@+id/btn_break"-->
+<!--        style="?android:attr/borderlessButtonStyle"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:backgroundTint="#0000ff00"-->
+<!--        android:text="Take A Break?"-->
+<!--        android:textAllCaps="false"-->
+<!--        android:textColor="#687980"-->
+<!--        app:layout_constraintBottom_toTopOf="@+id/guideline2"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        tools:ignore="MissingConstraints" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
