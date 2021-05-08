@@ -32,8 +32,16 @@ class WorkFragment : Fragment(){
         private var currentTime : Long = 0
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+    }
+
+
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
+
+
         val view = inflater.inflate(R.layout.fragment_work, container, false)
         FinishedTasks.REQUIRED_TASKS = arguments?.getString("checkedTasks")?.toInt() ?: 0
 
@@ -62,7 +70,7 @@ class WorkFragment : Fragment(){
             if (timeInput.isNullOrBlank()) {
                 Toast.makeText(context, "Set a focus time first", Toast.LENGTH_SHORT).show()
             } else {
-
+                myToolBar.visibility = View.INVISIBLE
                 var timeStart = timeInput.toString()
 
                 // CountDownTimer
@@ -75,7 +83,7 @@ class WorkFragment : Fragment(){
                                 TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
                     }
                     override fun onFinish() {
-                        SESSION_TYPE = SessionType.BREAK
+
                         cancel()
                         view.tv_countdown.setText("HH:MM:SS")
                         longBreakEligibilityToggle()
@@ -126,12 +134,21 @@ class WorkFragment : Fragment(){
 
         // Stop Button
         view.btn_stop.setOnClickListener{
+            myToolBar.visibility = View.VISIBLE
+            var checkedTaskRequirement = arguments?.getString("checkedTasks")
             timer.cancel()
-            view.btn_start.visibility = View.VISIBLE
             view.btn_stop.visibility = View.INVISIBLE
             view.tv_countdown.visibility = View.INVISIBLE
             view.tv_workText.visibility = View.INVISIBLE
             view.btn_pause.visibility = View.INVISIBLE
+            view.btn_startPause.visibility = View.INVISIBLE
+            view.btn_start.visibility = View.VISIBLE
+
+            if(SESSION_TYPE == SessionType.LONG_BREAK){
+                FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS - (checkedTaskRequirement?.toInt()?: 0)
+            }
+            workTimer()
+
         }
 
         // Pause Button
@@ -229,6 +246,10 @@ class WorkFragment : Fragment(){
         activity!!.title = ""
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
     // Navigate to Settings Fragment
     fun settingsFragment() {
         val fragment = SettingsFragment()
@@ -240,8 +261,12 @@ class WorkFragment : Fragment(){
         fragmentTransaction.commit()
     }
 
+
     fun workTimer(){
+        myToolBar.visibility = View.VISIBLE
         longBreakEligibilityToggle()
+        focusColor()
+
         btn_stop.visibility = View.INVISIBLE
         btn_pause.visibility = View.INVISIBLE
         tv_countdown.visibility = View.INVISIBLE
@@ -253,6 +278,7 @@ class WorkFragment : Fragment(){
 
         // Start Button
         btn_start.setOnClickListener {
+            this.activity?.actionBar?.hide()
             SESSION_STARTED = true
             var timeInput = arguments?.getString("focus")
 //            Log.d("TASK REQUIREMENT", checkedTaskRequirement.toString())
@@ -264,7 +290,7 @@ class WorkFragment : Fragment(){
                 Toast.makeText(context, "Set completed tasks requirements first", Toast.LENGTH_SHORT).show()
             }
             else {
-
+                myToolBar.visibility = View.INVISIBLE
                 var timeStart = timeInput.toString()
 
                 // CountDownTimer
@@ -278,6 +304,7 @@ class WorkFragment : Fragment(){
                             TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
                     }
                     override fun onFinish() {
+                        myToolBar.visibility = View.VISIBLE
                         SESSION_TYPE = SessionType.BREAK
                         cancel()
                         tv_countdown.setText("HH:MM:SS")
@@ -290,6 +317,8 @@ class WorkFragment : Fragment(){
                             Log.d("WORK TIMER", "LONG BREAK ELIGIBLE!")
                             longBreakColor()
                             btn_startLongBreakNow.setOnClickListener {
+                                myToolBar.visibility = View.INVISIBLE
+                                activity?.actionBar?.hide()
                                 SESSION_TYPE = SessionType.LONG_BREAK
                                 longBreakTimer()
                             }
@@ -310,6 +339,8 @@ class WorkFragment : Fragment(){
                             Log.d("WORK TIMER", "NOT LONG BREAK ELIGIBLE!")
                             breakColor()
                             btn_startBreakNow.setOnClickListener {
+                                myToolBar.visibility = View.INVISIBLE
+                                activity?.actionBar?.hide()
                                 SESSION_TYPE = SessionType.BREAK
                                 btn_startBreakNow.visibility = View.VISIBLE
                                 breakTimer()
@@ -337,14 +368,6 @@ class WorkFragment : Fragment(){
         }
 
         // Stop Button
-        btn_stop.setOnClickListener{
-            timer.cancel()
-            btn_start.visibility = View.VISIBLE
-            btn_stop.visibility = View.INVISIBLE
-            tv_countdown.visibility = View.INVISIBLE
-            tv_workText.visibility = View.INVISIBLE
-            btn_pause.visibility = View.INVISIBLE
-        }
 
         view?.btn_pause?.setOnClickListener{
             timer.cancel()
@@ -375,6 +398,7 @@ class WorkFragment : Fragment(){
 
                     if(LONG_BREAK_ELIGIBLE) {
                         view?.btn_startLongBreakNow?.setOnClickListener {
+                            activity?.actionBar?.hide()
                             SESSION_TYPE = SessionType.LONG_BREAK
                             longBreakTimer()
                         }
@@ -391,6 +415,7 @@ class WorkFragment : Fragment(){
                     }else{
                         //SHORT BREAK
                         view?.btn_startBreakNow?.setOnClickListener {
+                            activity?.actionBar?.hide()
                             SESSION_TYPE = SessionType.BREAK
                             view?.btn_startBreakNow?.visibility = View.VISIBLE
                             breakTimer()
@@ -411,11 +436,14 @@ class WorkFragment : Fragment(){
         }
 
 
+
     }
 
     // Short Break Timer
     fun breakTimer() {
-
+        myToolBar.visibility = View.VISIBLE
+        SESSION_TYPE = SessionType.BREAK
+        breakColor()
         var timeInput = arguments?.getString("break")
         var timeStart = timeInput.toString()
         tv_workText.setText("Break")
@@ -423,7 +451,7 @@ class WorkFragment : Fragment(){
         if (timeInput.isNullOrBlank()) {
             Toast.makeText(context, "Set a break time first", Toast.LENGTH_SHORT).show()
         } else {
-
+            myToolBar.visibility = View.INVISIBLE
             // CountDownTimer
             timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
@@ -436,6 +464,7 @@ class WorkFragment : Fragment(){
                 override fun onFinish() {
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
+                    myToolBar.visibility = View.VISIBLE
 
                     btn_start.visibility = View.VISIBLE
 
@@ -458,6 +487,8 @@ class WorkFragment : Fragment(){
             btn_pause.visibility = View.VISIBLE
             btn_startPause.setColorFilter(Color.parseColor("#99d5ca"))
         }
+
+
 
         // Break Start-Pause Button
         btn_startPause.setOnClickListener {
@@ -496,11 +527,17 @@ class WorkFragment : Fragment(){
                 }
             }.start()
         }
+//no
+
+
 
     }
 
     // Long Break Timer
     fun longBreakTimer() {
+        myToolBar.visibility = View.VISIBLE
+        SESSION_TYPE = SessionType.LONG_BREAK
+        longBreakColor()
         var checkedTaskRequirement = arguments?.getString("checkedTasks")
         var timeInput = arguments?.getString("longBreak")
         var timeStart = timeInput.toString()
@@ -509,7 +546,7 @@ class WorkFragment : Fragment(){
         if (timeInput.isNullOrBlank()) {
             Toast.makeText(context, "Set a long break time first", Toast.LENGTH_SHORT).show()
         } else {
-
+            myToolBar.visibility = View.INVISIBLE
             // CountDownTimer
             timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
 
@@ -521,6 +558,7 @@ class WorkFragment : Fragment(){
                             TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
                 }
                 override fun onFinish() {
+                    myToolBar.visibility = View.VISIBLE
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
 

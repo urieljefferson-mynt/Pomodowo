@@ -9,11 +9,14 @@ class MainActivity : AppCompatActivity(), Communicator{
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
+
         val workFragment = WorkFragment()
         supportFragmentManager.beginTransaction().replace(R.id.container, workFragment).commit()
         //TODO button
 
     }
+
 
     // Communicator - Work Fragment
     override fun passWorkData(focus: String, shortBreak: String, longBreak: String, checkedTasks: String) {
