@@ -1,6 +1,10 @@
 package ph.apper.android.pagatpatan.pomodowo
 
+import android.content.Context
+import android.content.SharedPreferences
+import ph.apper.android.pagatpatan.pomodowo.adapters.RVTodoAdapter
 import android.graphics.Color
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -10,13 +14,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.todolistjeff.dao.DatabaseHandler
+import ph.apper.android.pagatpatan.pomodowo.dao.DatabaseHandler
 import com.example.todolistjeff.model.TodoModelClass
 import kotlinx.android.synthetic.main.appbar.*
 import kotlinx.android.synthetic.main.appbar.view.*
+import kotlinx.android.synthetic.main.fragment_settings.*
+import kotlinx.android.synthetic.main.fragment_settings.view.*
 import kotlinx.android.synthetic.main.fragment_work.*
 import kotlinx.android.synthetic.main.fragment_work.view.*
-import ph.apper.android.pagatpatan.pomodowo.adapters.RVTodoAdapter
 import java.util.concurrent.TimeUnit
 
 
@@ -32,8 +37,9 @@ class WorkFragment : Fragment(){
         private var currentTime : Long = 0
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
     }
 
 
@@ -43,17 +49,17 @@ class WorkFragment : Fragment(){
 
 
         val view = inflater.inflate(R.layout.fragment_work, container, false)
+
+
         FinishedTasks.REQUIRED_TASKS = arguments?.getString("checkedTasks")?.toInt() ?: 0
 
         // Action Bar Buttons
         view.ic_arrow_back.visibility = View.INVISIBLE
         view.ic_menu.setOnClickListener{
-            settingsFragment()
+            settingsFragment(savedInstanceState)
         }
 
         // Communicator
-        communicator = activity as Communicator
-
         view.btn_stop.visibility = View.INVISIBLE
         view.btn_pause.visibility = View.INVISIBLE
         view.tv_countdown.visibility = View.INVISIBLE
@@ -72,19 +78,24 @@ class WorkFragment : Fragment(){
             } else {
                 myToolBar.visibility = View.INVISIBLE
                 var timeStart = timeInput.toString()
+                progress_countdown.max = timeStart.toInt() * 1000
+
 
                 // CountDownTimer
                 timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
                     override fun onTick(millisUntilFinished: Long) {
                         currentTime = millisUntilFinished
-                        tv_countdown.setText("" + String.format("%d:%d:%d",
-                                TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                                TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
+                        tv_countdown.text = "" + String.format("%d:%d:%d",
+                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
+
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
                     }
                     override fun onFinish() {
-
+                        myToolBar.visibility = View.VISIBLE
                         cancel()
+                        progress_countdown.progress = 0
                         view.tv_countdown.setText("HH:MM:SS")
                         longBreakEligibilityToggle()
 
@@ -135,6 +146,8 @@ class WorkFragment : Fragment(){
         // Stop Button
         view.btn_stop.setOnClickListener{
             myToolBar.visibility = View.VISIBLE
+            progress_countdown.progress = 0
+            myToolBar.visibility = View.VISIBLE
             var checkedTaskRequirement = arguments?.getString("checkedTasks")
             timer.cancel()
             view.btn_stop.visibility = View.INVISIBLE
@@ -164,21 +177,26 @@ class WorkFragment : Fragment(){
 
             view.btn_pause.visibility = View.VISIBLE
             view.btn_startPause.visibility = View.INVISIBLE
-
+            var timeInput = arguments?.getString("focus")
+            var timeStart = timeInput.toString()
             // CountDownTimer
             timer = object : CountDownTimer(currentTime*1, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime = millisUntilFinished
-                    tv_countdown.setText("" + String.format("%d:%d:%d",
-                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
+                    tv_countdown.text = "" + String.format("%d:%d:%d",
+                        TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
+
                 }
 
                 override fun onFinish() {
+                    progress_countdown.progress = 0
                     longBreakEligibilityToggle()
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
+                    myToolBar.visibility = View.VISIBLE
 
                     if(LONG_BREAK_ELIGIBLE) {
                         view.btn_startLongBreakNow.setOnClickListener {
@@ -216,27 +234,23 @@ class WorkFragment : Fragment(){
                 }
             }.start()
         }
-
-        // Take a Break Button
-//        view.btn_break.setOnClickListener{
-//            view.btn_start.visibility = View.INVISIBLE
-//            btn_break.visibility = View.INVISIBLE
-//            breakColor()
-//
-//            view.btn_startBreakNow.visibility = View.VISIBLE
-//            view.btn_startBreakNow.setOnClickListener{
-//                breakTimer()
-//            }
-//        }
-
         return view
     }
+
+
 
     // Add To do List
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)  {
         super.onViewCreated(view, savedInstanceState)
         //Display to do list upon start up
         viewRecord()
+
+
+        var focus_frag = frag_work
+        var animationDrawable: AnimationDrawable = focus_frag.background as AnimationDrawable
+        animationDrawable.setEnterFadeDuration(2500)
+        animationDrawable.setExitFadeDuration(2500)
+        animationDrawable.start()
         //Add Todo Button
         btn_add.setOnClickListener{ view ->
             Log.d("btn_add", "Selected")
@@ -251,14 +265,22 @@ class WorkFragment : Fragment(){
     }
 
     // Navigate to Settings Fragment
-    fun settingsFragment() {
-        val fragment = SettingsFragment()
-        val fragmentManager = activity!!.supportFragmentManager
+    fun settingsFragment(savedInstanceState: Bundle?) {
 
-        val fragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.container, fragment)
-        fragmentTransaction.addToBackStack(null)
-        fragmentTransaction.commit()
+        if (savedInstanceState == null) {
+            val settingsfragment = SettingsFragment()
+            val workFragment = activity!!.supportFragmentManager.findFragmentByTag("Work")
+            val fragmentManager = activity!!.supportFragmentManager
+
+            val fragmentTransaction = fragmentManager.beginTransaction()
+            fragmentTransaction.replace(R.id.container, settingsfragment, "Settings")
+            fragmentTransaction.commit()
+
+//            val fragment = activity!!.supportFragmentManager.findFragmentByTag("Settings")
+//            val fragmentManager = activity!!.supportFragmentManager
+//            fragmentManager.beginTransaction().commit()
+
+        }
     }
 
 
@@ -275,7 +297,7 @@ class WorkFragment : Fragment(){
         btn_start.visibility = View.VISIBLE
         btn_startBreakNow.visibility = View.INVISIBLE
         btn_startLongBreakNow.visibility = View.INVISIBLE
-
+        tv_workText.setText("Focus")
         // Start Button
         btn_start.setOnClickListener {
             this.activity?.actionBar?.hide()
@@ -292,18 +314,22 @@ class WorkFragment : Fragment(){
             else {
                 myToolBar.visibility = View.INVISIBLE
                 var timeStart = timeInput.toString()
+                progress_countdown.max = timeStart.toInt() * 1000
 
                 // CountDownTimer
                 timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
 
                     override fun onTick(millisUntilFinished: Long) {
                         currentTime = millisUntilFinished
-                        tv_countdown.setText("" + String.format("%d:%d:%d",
+                        tv_countdown.text = "" + String.format("%d:%d:%d",
                             TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                             TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
+                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
+                            progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
+
                     }
                     override fun onFinish() {
+                        progress_countdown.progress = 0
                         myToolBar.visibility = View.VISIBLE
                         SESSION_TYPE = SessionType.BREAK
                         cancel()
@@ -382,17 +408,23 @@ class WorkFragment : Fragment(){
             view?.btn_pause?.visibility = View.VISIBLE
             view?.btn_startPause?.visibility = View.INVISIBLE
 
+            var timeInput = arguments?.getString("focus")
+            var timeStart = timeInput.toString()
+
             // CountDownTimer
             timer = object : CountDownTimer(currentTime*1, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime = millisUntilFinished
-                    tv_countdown.setText("" + String.format("%d:%d:%d",
+                    tv_countdown.text = "" + String.format("%d:%d:%d",
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
+                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
+                        progress_countdown.progress = (timeStart.toLong()*1000 - currentTime).toInt()
+
                 }
 
                 override fun onFinish() {
+                    progress_countdown.progress = 0
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
 
@@ -451,17 +483,21 @@ class WorkFragment : Fragment(){
         if (timeInput.isNullOrBlank()) {
             Toast.makeText(context, "Set a break time first", Toast.LENGTH_SHORT).show()
         } else {
+            progress_countdown.max = timeStart.toInt() * 1000
             myToolBar.visibility = View.INVISIBLE
             // CountDownTimer
             timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime = millisUntilFinished
-                    tv_countdown.setText("" + String.format("%d:%d:%d",
-                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
+                    tv_countdown.text = "" + String.format("%d:%d:%d",
+                        TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
+
                 }
                 override fun onFinish() {
+                    progress_countdown.progress = 0
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
                     myToolBar.visibility = View.VISIBLE
@@ -492,21 +528,24 @@ class WorkFragment : Fragment(){
 
         // Break Start-Pause Button
         btn_startPause.setOnClickListener {
-
             btn_pause.visibility = View.VISIBLE
             btn_startPause.visibility = View.INVISIBLE
-
+            var timeInput = arguments?.getString("break")
+            var timeStart = timeInput.toString()
             // CountDownTimer
             timer = object : CountDownTimer(currentTime*1, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime = millisUntilFinished
-                    tv_countdown.setText("" + String.format("%d:%d:%d",
-                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
+                    tv_countdown.text = "" + String.format("%d:%d:%d",
+                        TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
+
                 }
 
                 override fun onFinish() {
+                    progress_countdown.progress = 0
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
 
@@ -518,7 +557,6 @@ class WorkFragment : Fragment(){
                     btn_stop.visibility = View.INVISIBLE
                     btn_pause.visibility = View.INVISIBLE
                     tv_workText.setText("Focus")
-//                    btn_breakfrag.visibility = View.VISIBLE
 
                     // Change color
                     focusColor()
@@ -527,7 +565,7 @@ class WorkFragment : Fragment(){
                 }
             }.start()
         }
-//no
+
 
 
 
@@ -546,37 +584,38 @@ class WorkFragment : Fragment(){
         if (timeInput.isNullOrBlank()) {
             Toast.makeText(context, "Set a long break time first", Toast.LENGTH_SHORT).show()
         } else {
+            progress_countdown.max = timeStart.toInt() * 1000
             myToolBar.visibility = View.INVISIBLE
             // CountDownTimer
             timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
 
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime = millisUntilFinished
-                    tv_countdown.setText("" + String.format("%d:%d:%d",
-                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
+                    tv_countdown.text = "" + String.format("%d:%d:%d",
+                        TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
+
                 }
                 override fun onFinish() {
+                    progress_countdown.progress = 0
                     myToolBar.visibility = View.VISIBLE
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
 
                     Log.d("TASK REQ: ", checkedTaskRequirement.toString())
-//                   Reset number of finished tasks back to zero
+
+//                  Decrease the number of long break elibility credits
                     FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS - (checkedTaskRequirement?.toInt()?: 0)
                     longBreakEligibilityToggle()
                     Log.d("LONGBREAKDONETASKS", FinishedTasks.CHECKED_OFF_TASKS.toString())
                     Log.d("LB -ELIGIBILITY?", LONG_BREAK_ELIGIBLE.toString())
+
                     workTimer()
 
-
-                    // Change color
-                    focusColor()
 
                     //TODO: Create function that will clear the checked off tasks in the recyclerView
-
-                    workTimer()
                 }
             }.start()
             btn_startLongBreakNow.visibility = View.INVISIBLE //longBreak button
@@ -597,10 +636,13 @@ class WorkFragment : Fragment(){
             timer = object : CountDownTimer(currentTime*1, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime = millisUntilFinished
-                    tv_countdown.setText("" + String.format("%d:%d:%d",
-                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))))
+                    tv_countdown.text = "" + String.format("%d:%d:%d",
+                        TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
+
+
                 }
 
                 override fun onFinish() {
@@ -676,7 +718,7 @@ class WorkFragment : Fragment(){
     //method for read records from database in ListView
     fun viewRecord(){
         //creating the instance of DatabaseHandler class
-        val databaseHandler: DatabaseHandler= DatabaseHandler(context!!)
+        val databaseHandler: DatabaseHandler = DatabaseHandler(context!!)
         //calling the viewEmployee method of DatabaseHandler class to read the records
         val emp: MutableList<TodoModelClass> = databaseHandler.viewTasks() as MutableList<TodoModelClass>
         //creating custom ArrayAdapter
@@ -698,7 +740,4 @@ class WorkFragment : Fragment(){
         Log.d("Toggle", LONG_BREAK_ELIGIBLE.toString())
 
     }
-
-    // Buttons Visibility
-
 }

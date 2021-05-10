@@ -1,6 +1,9 @@
 package ph.apper.android.pagatpatan.pomodowo
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.SeekBar
 import android.widget.Toast
@@ -19,10 +22,33 @@ class SettingsFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
 
+        val sharedPreferences: SharedPreferences = this.activity!!.getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
+
+        val focus: String? = sharedPreferences.getString("focus", null)
+        val shortBreak: String? = sharedPreferences.getString("break", null)
+        val longBreak: String? = sharedPreferences.getString("longBreak", null)
+        val checkedTasks: String? = sharedPreferences.getString("checkedTasks", null)
+        Log.d("SHAREDPREFSS", "$focus, $shortBreak, $longBreak, $checkedTasks")
+
+
+
+            Log.d("SEEK", "$focus, $shortBreak, $longBreak, $checkedTasks")
+            view.sb_break.progress = shortBreak?.toInt() ?: 50
+            view.sb_focus.progress = focus?.toInt() ?: 50
+            view.sb_longBreak.progress = longBreak?.toInt() ?: 50
+            view.sb_completeTask.progress = checkedTasks?.toInt() ?: 5
+
+            view.tv_focusDuration.text = view.sb_focus.progress.toString()
+            view.tv_breakDuration.text = view.sb_break.progress.toString()
+            view.tv_longBreakDuration.text = view.sb_longBreak.progress.toString()
+            view.tv_completeTask.text = view.sb_completeTask.progress.toString()
+
+        Log.d("SEEK", "NOT CALLED")
+
         // Action Bar Buttons
         view.ic_menu.visibility = View.INVISIBLE
         view.ic_arrow_back.setOnClickListener{
-            workFragment()
+            workFragment(savedInstanceState)
         }
 
         // Communicator
@@ -119,14 +145,16 @@ class SettingsFragment : Fragment() {
         return view
     }
 
-    fun workFragment() {
-        val fragment = WorkFragment()
-        val fragmentManager = activity!!.supportFragmentManager
+    fun workFragment(savedInstanceState: Bundle?) {
+            val fragment = WorkFragment()
+            val fragmentManager = activity!!.supportFragmentManager
 
-        val fragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.container, fragment)
-        fragmentTransaction.addToBackStack(null)
-        fragmentTransaction.commit()
+            val fragmentTransaction = fragmentManager.beginTransaction()
+            fragmentTransaction.replace(R.id.container, fragment)
+//            fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
+
     }
+
 
 }

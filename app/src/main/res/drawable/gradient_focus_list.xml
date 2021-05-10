@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/gradient_focus"
+        android:duration="2500"/>
+    <item android:drawable="@drawable/gradient_focus_2"
+        android:duration="2500"/>
+    <item android:drawable="@drawable/gradient_focus_3"
+        android:duration="2500"/>
+</animation-list>
