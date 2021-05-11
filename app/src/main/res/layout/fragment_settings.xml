@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".SettingsFragment"
+    android:orientation="vertical"
+    android:layout_centerHorizontal="true"
+    android:layout_alignParentBottom="true">
+
+    <include
+        layout="@layout/appbar"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp">
+
+        <TextView
+            android:id="@+id/tv_focus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Focus Session Duration"
+            android:textSize="16sp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:id="@+id/tv_focusDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50"
+            android:textSize="20sp"
+            android:layout_marginTop="35dp"
+            android:layout_centerHorizontal="true"/>
+
+        <SeekBar
+            android:id="@+id/sb_focus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/SeekBarColor"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="70dp"
+            android:layout_marginEnd="20dp"
+            android:alpha=".8"
+            android:max="100"
+            android:min="0"
+            android:progress="50" />
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp">
+
+        <TextView
+            android:id="@+id/tv_shortbreak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Break Session Duration"
+            android:textSize="16sp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:id="@+id/tv_breakDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50"
+            android:textSize="20sp"
+            android:layout_marginTop="35dp"
+            android:layout_centerHorizontal="true"/>
+
+        <SeekBar
+            android:id="@+id/sb_break"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/SeekBarColor"
+            android:max="100"
+            android:alpha=".8"
+            android:min="0"
+            android:progress="50"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="70dp"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp">
+
+        <TextView
+            android:id="@+id/tv_longbreak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Long Break Session Duration"
+            android:textSize="16sp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:id="@+id/tv_longBreakDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50"
+            android:textSize="20sp"
+            android:layout_marginTop="35dp"
+            android:layout_centerHorizontal="true"/>
+
+        <SeekBar
+            android:id="@+id/sb_longBreak"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/SeekBarColor"
+            android:max="100"
+            android:alpha=".8"
+            android:min="0"
+            android:progress="50"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="70dp"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp">
+
+        <TextView
+            android:id="@+id/tv_break"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Completed Tasks Required Before Long Break"
+            android:textSize="16sp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:id="@+id/tv_completeTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5"
+            android:textSize="20sp"
+            android:layout_marginTop="35dp"
+            android:layout_centerHorizontal="true"/>
+
+        <SeekBar
+            android:id="@+id/sb_completeTask"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/SeekBarColor"
+            android:max="10"
+            android:min="0"
+            android:alpha=".8"
+            android:progress="5"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="70dp"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_alignParentBottom="true">
+
+            <ImageButton
+                android:id="@+id/btn_submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#0000ff00"
+                android:src="@drawable/ic_check"
+                android:tint="#c2c2c2"
+                android:alpha=".8"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintVertical_bias="0.95" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>
