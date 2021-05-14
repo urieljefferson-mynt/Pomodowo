@@ -95,10 +95,10 @@ class RVTodoAdapter(private val context: Activity, private var todos: MutableLis
 
                 if (cb_done.isChecked) {
                     WorkFragment.breakPoints.value = WorkFragment.breakPoints.value?.plus(1)
-                    communicator?.passLongBreakCredits(FinishedTasks.LONG_BREAK_CREDITS)
+//                    communicator?.passLongBreakCredits(FinishedTasks.LONG_BREAK_CREDITS)
                 } else {
                     WorkFragment.breakPoints.value = WorkFragment.breakPoints.value?.minus(1)
-                    communicator?.passLongBreakCredits(FinishedTasks.LONG_BREAK_CREDITS)
+//                    communicator?.passLongBreakCredits(FinishedTasks.LONG_BREAK_CREDITS)
                 }
 
                 val cb = v as CheckBox

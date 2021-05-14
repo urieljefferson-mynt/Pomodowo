@@ -96,92 +96,7 @@ class WorkFragment : Fragment(){
             settingsFragment(savedInstanceState)
         }
 
-        // Initializing invisible elements
-//        view.btn_stop.visibility = View.INVISIBLE
-//        view.btn_pause.visibility = View.INVISIBLE
-//        view.tv_countdown.visibility = View.INVISIBLE
-//        view.tv_workText.visibility = View.INVISIBLE
-//        view.btn_startBreakNow.visibility = View.INVISIBLE
-//        view.btn_startLongBreakNow.visibility = View.INVISIBLE
-//        view.btn_startPause.visibility = View.INVISIBLE
 
-        // Work Session Start Button Initialization
-//        view.btn_start.setOnClickListener {
-//            if(focus == "null") {
-//                timeInput = arguments?.getString("focus").toString()
-//            }else{
-//                timeInput = focus
-//            }
-//
-//            if (timeInput == "null") {
-//                Toast.makeText(context, "Set a focus time first", Toast.LENGTH_SHORT).show()
-//            } else {
-//                myToolBar.visibility = View.INVISIBLE
-//                var timeStart = timeInput.toString()
-//                progress_countdown.max = timeStart.toInt() * 1000 * 60
-//
-//
-//                // CountDownTimer
-//                timer = object: CountDownTimer(timeStart.toLong() * 1000 * 60, 1000) {
-//                    override fun onTick(millisUntilFinished: Long) {
-//                        currentTime = millisUntilFinished
-//                        tv_countdown.text = "" + String.format("%d:%d:%d",
-//                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-//                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-//                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-//
-//                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
-//                    }
-//                    override fun onFinish() {
-//                        myToolBar.visibility = View.VISIBLE
-//                        cancel()
-//                        progress_countdown.progress = 0
-//                        view.tv_countdown.setText("HH:MM:SS")
-//                        longBreakEligibilityToggle()
-//
-//                        if(LONG_BREAK_ELIGIBLE) {
-//                            view.btn_startLongBreakNow.setOnClickListener {
-//                                SESSION_TYPE = SessionType.LONG_BREAK
-//                                longBreakTimer()
-//                            }
-//
-//                            view.btn_startLongBreakNow.visibility = View.VISIBLE
-//                            view.tv_countdown.visibility = View.INVISIBLE
-//                            view.tv_workText.visibility = View.INVISIBLE
-//                            view.btn_stop.visibility = View.INVISIBLE
-//                            view.btn_pause.visibility = View.INVISIBLE
-////                            view.btn_break.visibility = View.INVISIBLE
-//
-//                            // Change color
-//                            longBreakColor()
-//                        }else{
-//                            //SHORT BREAK
-//                            view.btn_startBreakNow.setOnClickListener {
-//                                SESSION_TYPE = SessionType.BREAK
-//                                view.btn_startBreakNow.visibility = View.VISIBLE
-//                                breakTimer()
-//
-//                            }
-//                            view.btn_startBreakNow.visibility = View.VISIBLE
-//                            view.tv_countdown.visibility = View.INVISIBLE
-//                            view.tv_workText.visibility = View.INVISIBLE
-//                            view.btn_stop.visibility = View.INVISIBLE
-//                            view.btn_pause.visibility = View.INVISIBLE
-////                            view.btn_break.visibility = View.INVISIBLE
-//
-//                            // Change color
-//                            breakColor()
-//                        }
-//
-//                    }
-//                }.start()
-//                view.btn_start.visibility = View.INVISIBLE // Work Button
-//                view.tv_countdown.visibility = View.VISIBLE
-//                view.tv_workText.visibility = View.VISIBLE
-//                view.btn_stop.visibility = View.VISIBLE
-//                view.btn_pause.visibility = View.VISIBLE
-//            }
-//        }
 
         // Stop Button
         view.btn_stop.setOnClickListener{
@@ -197,7 +112,6 @@ class WorkFragment : Fragment(){
             view.btn_start.visibility = View.VISIBLE
 
             if(SESSION_TYPE == SessionType.LONG_BREAK){
-//                FinishedTasks.LONG_BREAK_CREDITS = FinishedTasks.LONG_BREAK_CREDITS - (checkedTaskRequirement?.toInt()?: 0)
                 breakPoints.value = breakPoints.value?.minus((checkedTasks?.toInt()?: 0))
             }
             workTimer()
@@ -287,13 +201,6 @@ class WorkFragment : Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)  {
         super.onViewCreated(view, savedInstanceState)
 
-
-//        var focus_frag = frag_work
-//        var animationDrawable: AnimationDrawable = focus_frag.background as AnimationDrawable
-//        animationDrawable.setEnterFadeDuration(10)
-//        animationDrawable.setExitFadeDuration(500)
-//        animationDrawable.start()
-
         //Add Todo Button
         btn_add.setOnClickListener{ view ->
             Log.d("btn_add", "Selected")
@@ -320,10 +227,6 @@ class WorkFragment : Fragment(){
             val fragmentTransaction = fragmentManager.beginTransaction()
             fragmentTransaction.add(R.id.container, settingsfragment, "Settings").addToBackStack(null)
             fragmentTransaction.commit()
-
-//            val fragment = activity!!.supportFragmentManager.findFragmentByTag("Settings")
-//            val fragmentManager = activity!!.supportFragmentManager
-//            fragmentManager.beginTransaction().commit()
 
         }
     }
