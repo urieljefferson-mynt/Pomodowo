@@ -29,10 +29,10 @@ class SettingsFragment : Fragment() {
         val sharedPreferences: SharedPreferences? = this.activity?.getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
 
         //Restores the position of the seekbar from the latest user settings.
-        val focus: String? = sharedPreferences?.getString("focus", null)
-        val shortBreak: String? = sharedPreferences?.getString("break", null)
-        val longBreak: String? = sharedPreferences?.getString("longBreak", null)
-        val checkedTasks: String? = sharedPreferences?.getString("checkedTasks", null)
+        val focus: String? = sharedPreferences?.getString("focus", "50")
+        val shortBreak: String? = sharedPreferences?.getString("break", "50")
+        val longBreak: String? = sharedPreferences?.getString("longBreak", "50")
+        val checkedTasks: String? = sharedPreferences?.getString("checkedTasks", "5")
         Log.d("SHAREDPREFS", "$focus, $shortBreak, $longBreak, $checkedTasks")
 
 

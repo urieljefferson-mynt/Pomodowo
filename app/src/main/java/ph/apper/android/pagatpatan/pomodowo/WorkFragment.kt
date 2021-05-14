@@ -2,6 +2,7 @@ package ph.apper.android.pagatpatan.pomodowo
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
@@ -66,10 +67,10 @@ class WorkFragment : Fragment(){
 
 
         //Assigning saved user settings from shared preferences
-        focus = sharedPreferences.getString("focus", null).toString()
-        shortBreak= sharedPreferences.getString("break", null).toString()
-        longBreak = sharedPreferences?.getString("longBreak", null).toString()
-        checkedTasks = sharedPreferences?.getString("checkedTasks", null).toString()
+        focus = sharedPreferences.getString("focus", "25").toString()
+        shortBreak= sharedPreferences.getString("break", "5").toString()
+        longBreak = sharedPreferences?.getString("longBreak", "15").toString()
+        checkedTasks = sharedPreferences?.getString("checkedTasks", "4").toString()
 
 
         //Checking if there is a stored break (Doro Credits) from last user session
@@ -82,7 +83,7 @@ class WorkFragment : Fragment(){
         //Listen for data changes of the value of breakPoints, then display new value in tv_credits
         breakPoints.observe(this, Observer {
                 newValue ->
-                tv_credits.text = "Doro Credits: $newValue"
+                tv_credits.text = "Pomo Points: $newValue"
                 val editor: SharedPreferences.Editor? = persistentCredits?.edit()
                 editor?.apply {
                     putInt("breakPoints", newValue)
@@ -209,6 +210,8 @@ class WorkFragment : Fragment(){
         // toolbar title
         activity!!.title = ""
 
+
+
         //Initialize todo list and focus timer
         viewRecord()
         focusColor()
@@ -255,6 +258,8 @@ class WorkFragment : Fragment(){
             }else{
                 timeInput = focus
             }
+
+
 
             if (timeInput == "null") {
                 Toast.makeText(context, "Set a focus time first", Toast.LENGTH_SHORT).show()
@@ -698,6 +703,8 @@ class WorkFragment : Fragment(){
         databaseHandler = DatabaseHandler(context!!)
         databaseHandler.deleteTodo(todo)
     }
+
+
 
 
     //Swipe right to delete feature
