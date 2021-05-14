@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@drawable/gradient_focus_list"
+    android:background="#ff9494"
     android:id="@+id/frag_work"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,10 +15,11 @@
         android:id="@+id/tv_countdown"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:layout_marginBottom="8dp"
         android:textSize="30sp"
         android:textStyle="bold"
+        android:textColor="#E1DCDC"
+        android:alpha="0.8"
         app:layout_constraintVertical_bias="0.565"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintHorizontal_bias="0.5"
@@ -33,6 +34,8 @@
         android:layout_height="wrap_content"
         android:text="Focus"
         android:textSize="18sp"
+        android:textColor="#E1DCDC"
+        android:alpha="0.8"
         app:layout_constraintVertical_bias="0.565"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -48,7 +51,7 @@
         android:src="@drawable/ic_pause"
         android:tint="@color/focus"
         app:iconGravity="textStart"
-        android:alpha="0.3"
+
         app:layout_constraintBottom_toTopOf="@id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintVertical_bias="0.565"
@@ -65,7 +68,7 @@
         android:src="@drawable/ic_play"
         android:tint="@color/focus"
         app:iconGravity="textStart"
-        android:alpha="0.3"
+
         app:layout_constraintVertical_bias="0.565"
         app:layout_constraintBottom_toTopOf="@id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -82,7 +85,7 @@
         android:src="@drawable/ic_play"
         android:tint="@color/focus"
         app:iconGravity="textStart"
-        android:alpha="0.3"
+
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintVertical_bias="0.565"
@@ -100,7 +103,7 @@
         android:src="@drawable/ic_play"
         android:tint="@color/focus"
         app:iconGravity="textStart"
-        android:alpha="0.3"
+
         app:layout_constraintVertical_bias="0.565"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -118,7 +121,7 @@
         android:src="@drawable/ic_play"
         android:tint="@color/focus"
         app:iconGravity="textStart"
-        android:alpha="0.3"
+
         app:layout_constraintVertical_bias="0.565"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -136,7 +139,7 @@
         android:src="@drawable/ic_stop"
         android:tint="@color/focus"
         app:iconGravity="textStart"
-        android:alpha="0.3"
+
         app:layout_constraintVertical_bias="0.565"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -160,7 +163,7 @@
         android:id="@+id/btn_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:alpha="0.3"
+
         android:backgroundTint="#0000ff00"
         android:paddingTop="0dp"
         android:src="@drawable/ic_add"
@@ -184,7 +187,7 @@
         android:layout_height="wrap_content"
         android:autofillHints="Enter New Todo Task"
         android:inputType="text"
-        android:hint="add new task"
+        android:hint="Add New Task"
         android:layout_marginStart="20sp"
         android:layout_marginEnd="20sp"
         app:layout_constraintBottom_toTopOf="@+id/btn_add"
@@ -200,7 +203,7 @@
         android:layout_marginBottom="8dp"
         android:minWidth="306dp"
         android:minHeight="306dp"
-        app:indicatorColor="#66FFFFFF"
+        app:indicatorColor="#80000000"
         app:indicatorDirectionCircular="counterclockwise"
         app:indicatorSize="200sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
@@ -208,7 +211,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.65"
-        app:trackColor="#33000000"
+        app:trackColor="#E1DCDC"
+        android:alpha="0.5"
         app:trackThickness="16sp" />
 
 

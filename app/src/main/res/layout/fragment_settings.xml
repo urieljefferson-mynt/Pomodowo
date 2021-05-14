@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#02dbdb"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".SettingsFragment"
     android:orientation="vertical"
@@ -10,7 +11,7 @@
     android:layout_alignParentBottom="true">
 
     <include
-        layout="@layout/appbar"/>
+        layout="@layout/appbar_settings"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -43,7 +44,6 @@
             android:layout_marginStart="20dp"
             android:layout_marginTop="70dp"
             android:layout_marginEnd="20dp"
-            android:alpha=".8"
             android:max="100"
             android:min="0"
             android:progress="50" />
@@ -80,7 +80,6 @@
             android:layout_height="wrap_content"
             android:theme="@style/SeekBarColor"
             android:max="100"
-            android:alpha=".8"
             android:min="0"
             android:progress="50"
             android:layout_marginStart="20dp"
@@ -118,7 +117,6 @@
             android:layout_height="wrap_content"
             android:theme="@style/SeekBarColor"
             android:max="100"
-            android:alpha=".8"
             android:min="0"
             android:progress="50"
             android:layout_marginStart="20dp"
@@ -157,7 +155,6 @@
             android:theme="@style/SeekBarColor"
             android:max="10"
             android:min="0"
-            android:alpha=".8"
             android:progress="5"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
@@ -182,7 +179,6 @@
                 android:backgroundTint="#0000ff00"
                 android:src="@drawable/ic_check"
                 android:tint="#c2c2c2"
-                android:alpha=".8"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

@@ -2,12 +2,14 @@ package ph.apper.android.pagatpatan.pomodowo
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.appbar.*
 import kotlinx.android.synthetic.main.appbar.view.*
 import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
@@ -21,7 +23,6 @@ class SettingsFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
-
         val sharedPreferences: SharedPreferences = this.activity!!.getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
 
         val focus: String? = sharedPreferences.getString("focus", null)
@@ -29,8 +30,6 @@ class SettingsFragment : Fragment() {
         val longBreak: String? = sharedPreferences.getString("longBreak", null)
         val checkedTasks: String? = sharedPreferences.getString("checkedTasks", null)
         Log.d("SHAREDPREFSS", "$focus, $shortBreak, $longBreak, $checkedTasks")
-
-
 
             Log.d("SEEK", "$focus, $shortBreak, $longBreak, $checkedTasks")
             view.sb_break.progress = shortBreak?.toInt() ?: 50

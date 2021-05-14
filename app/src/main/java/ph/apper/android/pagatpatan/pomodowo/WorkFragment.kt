@@ -245,12 +245,12 @@ class WorkFragment : Fragment(){
         //Display to do list upon start up
         viewRecord()
 
-
-        var focus_frag = frag_work
-        var animationDrawable: AnimationDrawable = focus_frag.background as AnimationDrawable
-        animationDrawable.setEnterFadeDuration(2500)
-        animationDrawable.setExitFadeDuration(2500)
-        animationDrawable.start()
+//        // Fragment Animated Background
+//        var focus_frag = frag_work
+//        var animationDrawable: AnimationDrawable = focus_frag.background as AnimationDrawable
+//        animationDrawable.setEnterFadeDuration(2500)
+//        animationDrawable.setExitFadeDuration(2500)
+//        animationDrawable.start()
         //Add Todo Button
         btn_add.setOnClickListener{ view ->
             Log.d("btn_add", "Selected")
@@ -672,30 +672,33 @@ class WorkFragment : Fragment(){
 
     // Change color of break view
     fun breakColor() {
-        myToolBar.setBackgroundColor(Color.parseColor("#99d5ca"))
-        btn_startBreakNow.setColorFilter(Color.parseColor("#99d5ca"))
-        btn_stop.setColorFilter(Color.parseColor("#99d5ca"))
-        btn_pause.setColorFilter(Color.parseColor("#99d5ca"))
-        btn_add.setColorFilter(Color.parseColor("#99d5ca"))
+        frag_work.setBackgroundColor(Color.parseColor("#03dcb0"))
+        myToolBar.setBackgroundColor(Color.parseColor("#81f2db"))
+        btn_startBreakNow.setColorFilter(Color.parseColor("#81f2db"))
+        btn_stop.setColorFilter(Color.parseColor("#81f2db"))
+        btn_pause.setColorFilter(Color.parseColor("#81f2db"))
+        btn_add.setColorFilter(Color.parseColor("#81f2db"))
     }
 
     // Change color of long break view
     fun longBreakColor() {
-        myToolBar.setBackgroundColor(Color.parseColor("#b391b5"))
-        btn_startLongBreakNow.setColorFilter(Color.parseColor("#b391b5"))
-        btn_stop.setColorFilter(Color.parseColor("#b391b5"))
-        btn_pause.setColorFilter(Color.parseColor("#b391b5"))
-        btn_add.setColorFilter(Color.parseColor("#b391b5"))
+        frag_work.setBackgroundColor(Color.parseColor("#b685ff"))
+        myToolBar.setBackgroundColor(Color.parseColor("#dac2ff"))
+        btn_startLongBreakNow.setColorFilter(Color.parseColor("#dac2ff"))
+        btn_stop.setColorFilter(Color.parseColor("#dac2ff"))
+        btn_pause.setColorFilter(Color.parseColor("#dac2ff"))
+        btn_add.setColorFilter(Color.parseColor("#dac2ff"))
     }
 
     // Change color of long break view
     fun focusColor() {
-        myToolBar.setBackgroundColor(Color.parseColor("#ffbbb1"))
-        btn_startBreakNow.setColorFilter(Color.parseColor("#ffbbb1"))
-        btn_stop.setColorFilter(Color.parseColor("#ffbbb1"))
-        btn_pause.setColorFilter(Color.parseColor("#ffbbb1"))
-        btn_add.setColorFilter(Color.parseColor("#ffbbb1"))
-        btn_startPause.setColorFilter(Color.parseColor("#ffbbb1"))
+        frag_work.setBackgroundColor(Color.parseColor("#ff9494"))
+        myToolBar.setBackgroundColor(Color.parseColor("#ffc8c2"))
+        btn_startBreakNow.setColorFilter(Color.parseColor("#ffc8c2"))
+        btn_stop.setColorFilter(Color.parseColor("#ffc8c2"))
+        btn_pause.setColorFilter(Color.parseColor("#ffc8c2"))
+        btn_add.setColorFilter(Color.parseColor("#ffc8c2"))
+        btn_startPause.setColorFilter(Color.parseColor("#ffc8c2"))
     }
 
     fun saveRecord(){
