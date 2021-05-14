@@ -22,7 +22,6 @@ class DatabaseHandler(context: Context): SQLiteOpenHelper(context,
         private val KEY_STATUS = "isChecked"
     }
     override fun onCreate(db: SQLiteDatabase?) {
-        // TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         //creating table with fields
         val CREATE_CONTACTS_TABLE = ("CREATE TABLE " + TABLE_CONTACTS + "("
                 + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT,"
@@ -31,7 +30,6 @@ class DatabaseHandler(context: Context): SQLiteOpenHelper(context,
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        //  TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         db!!.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACTS)
         onCreate(db)
     }
@@ -91,12 +89,12 @@ class DatabaseHandler(context: Context): SQLiteOpenHelper(context,
         return success
     }
     //method to delete data
-    fun deleteEmployee(emp: TodoModelClass):Int{
+    fun deleteTodo(todo: TodoModelClass):Int{
         val db = this.writableDatabase
         val contentValues = ContentValues()
-        contentValues.put(KEY_ID, emp.id) // EmpModelClass UserId
+        contentValues.put(KEY_ID, todo.id) // Todo UserId
         // Deleting Row
-        val success = db.delete(TABLE_CONTACTS,"id="+emp.id,null)
+        val success = db.delete(TABLE_CONTACTS,"id="+todo.id,null)
         //2nd argument is String containing nullColumnHack
         db.close() // Closing database connection
         return success

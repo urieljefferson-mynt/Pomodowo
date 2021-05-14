@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/frag_settings"
     tools:context=".SettingsFragment"
     android:orientation="vertical"
     android:layout_centerHorizontal="true"
@@ -24,13 +25,14 @@
             android:text="Focus Session Duration"
             android:textSize="16sp"
             android:layout_centerHorizontal="true"
-            android:textColor="@color/black"/>
+            android:textColor="@color/white"/>
 
         <TextView
             android:id="@+id/tv_focusDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="50"
+            android:textColor="@color/white"
             android:textSize="20sp"
             android:layout_marginTop="35dp"
             android:layout_centerHorizontal="true"/>
@@ -63,13 +65,14 @@
             android:text="Break Session Duration"
             android:textSize="16sp"
             android:layout_centerHorizontal="true"
-            android:textColor="@color/black"/>
+            android:textColor="@color/white"/>
 
         <TextView
             android:id="@+id/tv_breakDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="50"
+            android:textColor="@color/white"
             android:textSize="20sp"
             android:layout_marginTop="35dp"
             android:layout_centerHorizontal="true"/>
@@ -101,13 +104,14 @@
             android:text="Long Break Session Duration"
             android:textSize="16sp"
             android:layout_centerHorizontal="true"
-            android:textColor="@color/black"/>
+            android:textColor="@color/white"/>
 
         <TextView
             android:id="@+id/tv_longBreakDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="50"
+            android:textColor="@color/white"
             android:textSize="20sp"
             android:layout_marginTop="35dp"
             android:layout_centerHorizontal="true"/>
@@ -139,13 +143,14 @@
             android:text="Completed Tasks Required Before Long Break"
             android:textSize="16sp"
             android:layout_centerHorizontal="true"
-            android:textColor="@color/black"/>
+            android:textColor="@color/white"/>
 
         <TextView
             android:id="@+id/tv_completeTask"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="5"
+            android:textColor="@color/white"
             android:textSize="20sp"
             android:layout_marginTop="35dp"
             android:layout_centerHorizontal="true"/>
@@ -181,7 +186,7 @@
                 android:layout_height="wrap_content"
                 android:backgroundTint="#0000ff00"
                 android:src="@drawable/ic_check"
-                android:tint="#c2c2c2"
+                android:tint="@color/focus"
                 android:alpha=".8"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

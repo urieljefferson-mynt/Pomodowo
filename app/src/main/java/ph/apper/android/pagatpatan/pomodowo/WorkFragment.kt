@@ -2,7 +2,6 @@ package ph.apper.android.pagatpatan.pomodowo
 
 import android.content.Context
 import android.content.SharedPreferences
-import ph.apper.android.pagatpatan.pomodowo.adapters.RVTodoAdapter
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
@@ -13,33 +12,41 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import ph.apper.android.pagatpatan.pomodowo.dao.DatabaseHandler
+import androidx.recyclerview.widget.RecyclerView
 import com.example.todolistjeff.model.TodoModelClass
 import kotlinx.android.synthetic.main.appbar.*
 import kotlinx.android.synthetic.main.appbar.view.*
-import kotlinx.android.synthetic.main.fragment_settings.*
-import kotlinx.android.synthetic.main.fragment_settings.view.*
 import kotlinx.android.synthetic.main.fragment_work.*
 import kotlinx.android.synthetic.main.fragment_work.view.*
+import ph.apper.android.pagatpatan.pomodowo.adapters.RVTodoAdapter
+import ph.apper.android.pagatpatan.pomodowo.dao.DatabaseHandler
 import java.util.concurrent.TimeUnit
 
 
 class WorkFragment : Fragment(){
-    var LONG_BREAK_ELIGIBLE = false
-    var SESSION_STARTED = false
-    var SESSION_TYPE: SessionType =  SessionType.FOCUS
+
 
     private lateinit var communicator: Communicator
 
     companion object {
         private lateinit var timer: CountDownTimer
+        private lateinit var focus: String
+        private lateinit var shortBreak: String
+        private lateinit var longBreak: String
+        private lateinit var checkedTasks: String
+        private lateinit var timeInput: String
+        private lateinit var myListAdapter: RVTodoAdapter
+        private lateinit var todoList: MutableList<TodoModelClass>
+        private lateinit var databaseHandler: DatabaseHandler
         private var currentTime : Long = 0
-    }
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        var LONG_BREAK_ELIGIBLE = false
+//        var SESSION_STARTED = false
+        var SESSION_TYPE: SessionType =  SessionType.FOCUS
+        var breakPoints: MutableLiveData<Int> = MutableLiveData(0)
     }
 
 
@@ -50,8 +57,38 @@ class WorkFragment : Fragment(){
 
         val view = inflater.inflate(R.layout.fragment_work, container, false)
 
+        //Load persisted user settings data
+        val sharedPreferences: SharedPreferences = this.activity!!.getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
+        val persistentCredits: SharedPreferences? = this.activity?.getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
+//        val longBreakCredits: Int? = sharedPreferences.getInt("longBreakCredits", 0)
 
-        FinishedTasks.REQUIRED_TASKS = arguments?.getString("checkedTasks")?.toInt() ?: 0
+        view.myToolBar.visibility = View.VISIBLE
+
+
+        //Assigning saved user settings from shared preferences
+        focus = sharedPreferences.getString("focus", null).toString()
+        shortBreak= sharedPreferences.getString("break", null).toString()
+        longBreak = sharedPreferences?.getString("longBreak", null).toString()
+        checkedTasks = sharedPreferences?.getString("checkedTasks", null).toString()
+
+
+        //Checking if there is a stored break (Doro Credits) from last user session
+        val breakCredits: Int? = persistentCredits?.getInt("breakPoints", 0)
+        if(breakCredits != 0){
+            breakPoints.value = breakCredits
+        }
+
+
+        //Listen for data changes of the value of breakPoints, then display new value in tv_credits
+        breakPoints.observe(this, Observer {
+                newValue ->
+                tv_credits.text = "Doro Credits: $newValue"
+                val editor: SharedPreferences.Editor? = persistentCredits?.edit()
+                editor?.apply {
+                    putInt("breakPoints", newValue)
+                }?.apply()
+        })
+
 
         // Action Bar Buttons
         view.ic_arrow_back.visibility = View.INVISIBLE
@@ -59,96 +96,98 @@ class WorkFragment : Fragment(){
             settingsFragment(savedInstanceState)
         }
 
-        // Communicator
-        view.btn_stop.visibility = View.INVISIBLE
-        view.btn_pause.visibility = View.INVISIBLE
-        view.tv_countdown.visibility = View.INVISIBLE
-        view.tv_workText.visibility = View.INVISIBLE
-        view.btn_startBreakNow.visibility = View.INVISIBLE
-        view.btn_startLongBreakNow.visibility = View.INVISIBLE
-        view.btn_startPause.visibility = View.INVISIBLE
+        // Initializing invisible elements
+//        view.btn_stop.visibility = View.INVISIBLE
+//        view.btn_pause.visibility = View.INVISIBLE
+//        view.tv_countdown.visibility = View.INVISIBLE
+//        view.tv_workText.visibility = View.INVISIBLE
+//        view.btn_startBreakNow.visibility = View.INVISIBLE
+//        view.btn_startLongBreakNow.visibility = View.INVISIBLE
+//        view.btn_startPause.visibility = View.INVISIBLE
 
-        // Start Button Init
-        view.btn_start.setOnClickListener {
-
-            var timeInput = arguments?.getString("focus")
-
-            if (timeInput.isNullOrBlank()) {
-                Toast.makeText(context, "Set a focus time first", Toast.LENGTH_SHORT).show()
-            } else {
-                myToolBar.visibility = View.INVISIBLE
-                var timeStart = timeInput.toString()
-                progress_countdown.max = timeStart.toInt() * 1000
-
-
-                // CountDownTimer
-                timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
-                    override fun onTick(millisUntilFinished: Long) {
-                        currentTime = millisUntilFinished
-                        tv_countdown.text = "" + String.format("%d:%d:%d",
-                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-
-                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
-                    }
-                    override fun onFinish() {
-                        myToolBar.visibility = View.VISIBLE
-                        cancel()
-                        progress_countdown.progress = 0
-                        view.tv_countdown.setText("HH:MM:SS")
-                        longBreakEligibilityToggle()
-
-                        if(LONG_BREAK_ELIGIBLE) {
-                            view.btn_startLongBreakNow.setOnClickListener {
-                                SESSION_TYPE = SessionType.LONG_BREAK
-                                longBreakTimer()
-                            }
-
-                            view.btn_startLongBreakNow.visibility = View.VISIBLE
-                            view.tv_countdown.visibility = View.INVISIBLE
-                            view.tv_workText.visibility = View.INVISIBLE
-                            view.btn_stop.visibility = View.INVISIBLE
-                            view.btn_pause.visibility = View.INVISIBLE
-//                            view.btn_break.visibility = View.INVISIBLE
-
-                            // Change color
-                            longBreakColor()
-                        }else{
-                            //SHORT BREAK
-                            view.btn_startBreakNow.setOnClickListener {
-                                SESSION_TYPE = SessionType.BREAK
-                                view.btn_startBreakNow.visibility = View.VISIBLE
-                                breakTimer()
-
-                            }
-                            view.btn_startBreakNow.visibility = View.VISIBLE
-                            view.tv_countdown.visibility = View.INVISIBLE
-                            view.tv_workText.visibility = View.INVISIBLE
-                            view.btn_stop.visibility = View.INVISIBLE
-                            view.btn_pause.visibility = View.INVISIBLE
-//                            view.btn_break.visibility = View.INVISIBLE
-
-                            // Change color
-                            breakColor()
-                        }
-
-                    }
-                }.start()
-                view.btn_start.visibility = View.INVISIBLE // Work Button
-                view.tv_countdown.visibility = View.VISIBLE
-                view.tv_workText.visibility = View.VISIBLE
-                view.btn_stop.visibility = View.VISIBLE
-                view.btn_pause.visibility = View.VISIBLE
-            }
-        }
+        // Work Session Start Button Initialization
+//        view.btn_start.setOnClickListener {
+//            if(focus == "null") {
+//                timeInput = arguments?.getString("focus").toString()
+//            }else{
+//                timeInput = focus
+//            }
+//
+//            if (timeInput == "null") {
+//                Toast.makeText(context, "Set a focus time first", Toast.LENGTH_SHORT).show()
+//            } else {
+//                myToolBar.visibility = View.INVISIBLE
+//                var timeStart = timeInput.toString()
+//                progress_countdown.max = timeStart.toInt() * 1000 * 60
+//
+//
+//                // CountDownTimer
+//                timer = object: CountDownTimer(timeStart.toLong() * 1000 * 60, 1000) {
+//                    override fun onTick(millisUntilFinished: Long) {
+//                        currentTime = millisUntilFinished
+//                        tv_countdown.text = "" + String.format("%d:%d:%d",
+//                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+//                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+//                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
+//
+//                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+//                    }
+//                    override fun onFinish() {
+//                        myToolBar.visibility = View.VISIBLE
+//                        cancel()
+//                        progress_countdown.progress = 0
+//                        view.tv_countdown.setText("HH:MM:SS")
+//                        longBreakEligibilityToggle()
+//
+//                        if(LONG_BREAK_ELIGIBLE) {
+//                            view.btn_startLongBreakNow.setOnClickListener {
+//                                SESSION_TYPE = SessionType.LONG_BREAK
+//                                longBreakTimer()
+//                            }
+//
+//                            view.btn_startLongBreakNow.visibility = View.VISIBLE
+//                            view.tv_countdown.visibility = View.INVISIBLE
+//                            view.tv_workText.visibility = View.INVISIBLE
+//                            view.btn_stop.visibility = View.INVISIBLE
+//                            view.btn_pause.visibility = View.INVISIBLE
+////                            view.btn_break.visibility = View.INVISIBLE
+//
+//                            // Change color
+//                            longBreakColor()
+//                        }else{
+//                            //SHORT BREAK
+//                            view.btn_startBreakNow.setOnClickListener {
+//                                SESSION_TYPE = SessionType.BREAK
+//                                view.btn_startBreakNow.visibility = View.VISIBLE
+//                                breakTimer()
+//
+//                            }
+//                            view.btn_startBreakNow.visibility = View.VISIBLE
+//                            view.tv_countdown.visibility = View.INVISIBLE
+//                            view.tv_workText.visibility = View.INVISIBLE
+//                            view.btn_stop.visibility = View.INVISIBLE
+//                            view.btn_pause.visibility = View.INVISIBLE
+////                            view.btn_break.visibility = View.INVISIBLE
+//
+//                            // Change color
+//                            breakColor()
+//                        }
+//
+//                    }
+//                }.start()
+//                view.btn_start.visibility = View.INVISIBLE // Work Button
+//                view.tv_countdown.visibility = View.VISIBLE
+//                view.tv_workText.visibility = View.VISIBLE
+//                view.btn_stop.visibility = View.VISIBLE
+//                view.btn_pause.visibility = View.VISIBLE
+//            }
+//        }
 
         // Stop Button
         view.btn_stop.setOnClickListener{
             myToolBar.visibility = View.VISIBLE
             progress_countdown.progress = 0
-            myToolBar.visibility = View.VISIBLE
-            var checkedTaskRequirement = arguments?.getString("checkedTasks")
+
             timer.cancel()
             view.btn_stop.visibility = View.INVISIBLE
             view.tv_countdown.visibility = View.INVISIBLE
@@ -158,7 +197,8 @@ class WorkFragment : Fragment(){
             view.btn_start.visibility = View.VISIBLE
 
             if(SESSION_TYPE == SessionType.LONG_BREAK){
-                FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS - (checkedTaskRequirement?.toInt()?: 0)
+//                FinishedTasks.LONG_BREAK_CREDITS = FinishedTasks.LONG_BREAK_CREDITS - (checkedTaskRequirement?.toInt()?: 0)
+                breakPoints.value = breakPoints.value?.minus((checkedTasks?.toInt()?: 0))
             }
             workTimer()
 
@@ -177,7 +217,11 @@ class WorkFragment : Fragment(){
 
             view.btn_pause.visibility = View.VISIBLE
             view.btn_startPause.visibility = View.INVISIBLE
-            var timeInput = arguments?.getString("focus")
+                if(focus == "null") {
+                    timeInput = arguments?.getString("focus").toString()
+                }else{
+                    timeInput = focus
+                }
             var timeStart = timeInput.toString()
             // CountDownTimer
             timer = object : CountDownTimer(currentTime*1, 1000) {
@@ -187,7 +231,7 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
 
                 }
 
@@ -199,8 +243,8 @@ class WorkFragment : Fragment(){
                     myToolBar.visibility = View.VISIBLE
 
                     if(LONG_BREAK_ELIGIBLE) {
+                        SESSION_TYPE = SessionType.LONG_BREAK
                         view.btn_startLongBreakNow.setOnClickListener {
-                            SESSION_TYPE = SessionType.LONG_BREAK
                             longBreakTimer()
                         }
 
@@ -215,8 +259,8 @@ class WorkFragment : Fragment(){
                         longBreakColor()
                     }else{
                         //SHORT BREAK
+                        SESSION_TYPE = SessionType.BREAK
                         view.btn_startBreakNow.setOnClickListener {
-                            SESSION_TYPE = SessionType.BREAK
                             view.btn_startBreakNow.visibility = View.VISIBLE
                             breakTimer()
 
@@ -242,15 +286,14 @@ class WorkFragment : Fragment(){
     // Add To do List
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)  {
         super.onViewCreated(view, savedInstanceState)
-        //Display to do list upon start up
-        viewRecord()
 
 
-        var focus_frag = frag_work
-        var animationDrawable: AnimationDrawable = focus_frag.background as AnimationDrawable
-        animationDrawable.setEnterFadeDuration(2500)
-        animationDrawable.setExitFadeDuration(2500)
-        animationDrawable.start()
+//        var focus_frag = frag_work
+//        var animationDrawable: AnimationDrawable = focus_frag.background as AnimationDrawable
+//        animationDrawable.setEnterFadeDuration(10)
+//        animationDrawable.setExitFadeDuration(500)
+//        animationDrawable.start()
+
         //Add Todo Button
         btn_add.setOnClickListener{ view ->
             Log.d("btn_add", "Selected")
@@ -258,11 +301,13 @@ class WorkFragment : Fragment(){
         }
         // toolbar title
         activity!!.title = ""
+
+        //Initialize todo list and focus timer
+        viewRecord()
+        focusColor()
+        workTimer()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 
     // Navigate to Settings Fragment
     fun settingsFragment(savedInstanceState: Bundle?) {
@@ -273,7 +318,7 @@ class WorkFragment : Fragment(){
             val fragmentManager = activity!!.supportFragmentManager
 
             val fragmentTransaction = fragmentManager.beginTransaction()
-            fragmentTransaction.replace(R.id.container, settingsfragment, "Settings")
+            fragmentTransaction.add(R.id.container, settingsfragment, "Settings").addToBackStack(null)
             fragmentTransaction.commit()
 
 //            val fragment = activity!!.supportFragmentManager.findFragmentByTag("Settings")
@@ -289,117 +334,101 @@ class WorkFragment : Fragment(){
         longBreakEligibilityToggle()
         focusColor()
 
-        btn_stop.visibility = View.INVISIBLE
-        btn_pause.visibility = View.INVISIBLE
-        tv_countdown.visibility = View.INVISIBLE
-        tv_workText.visibility = View.INVISIBLE
-
+        view?.btn_stop?.visibility = View.INVISIBLE
+        view?.btn_pause?.visibility = View.INVISIBLE
+        view?.tv_countdown?.visibility = View.INVISIBLE
+        view?.tv_workText?.visibility = View.INVISIBLE
+        view?.btn_startBreakNow?.visibility = View.INVISIBLE
+        view?.btn_startLongBreakNow?.visibility = View.INVISIBLE
+        view?.btn_startPause?.visibility = View.INVISIBLE
         btn_start.visibility = View.VISIBLE
-        btn_startBreakNow.visibility = View.INVISIBLE
-        btn_startLongBreakNow.visibility = View.INVISIBLE
+
+
         tv_workText.setText("Focus")
         // Start Button
-        btn_start.setOnClickListener {
-            this.activity?.actionBar?.hide()
-            SESSION_STARTED = true
-            var timeInput = arguments?.getString("focus")
-//            Log.d("TASK REQUIREMENT", checkedTaskRequirement.toString())
+        view?.btn_start?.setOnClickListener {
+            if(focus == "null") {
+                timeInput = arguments?.getString("focus").toString()
+            }else{
+                timeInput = focus
+            }
 
-            if (timeInput.isNullOrBlank()) {
+            if (timeInput == "null") {
                 Toast.makeText(context, "Set a focus time first", Toast.LENGTH_SHORT).show()
-            }
-            else if (FinishedTasks.REQUIRED_TASKS == 0) {
-                Toast.makeText(context, "Set completed tasks requirements first", Toast.LENGTH_SHORT).show()
-            }
-            else {
+            } else {
                 myToolBar.visibility = View.INVISIBLE
                 var timeStart = timeInput.toString()
-                progress_countdown.max = timeStart.toInt() * 1000
+                progress_countdown.max = timeStart.toInt() * 1000 * 60
+
 
                 // CountDownTimer
-                timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
-
+                timer = object: CountDownTimer(timeStart.toLong() * 1000 * 60, 1000) {
                     override fun onTick(millisUntilFinished: Long) {
                         currentTime = millisUntilFinished
                         tv_countdown.text = "" + String.format("%d:%d:%d",
                             TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                             TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                             TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                            progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
 
+                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
                     }
+
                     override fun onFinish() {
-                        progress_countdown.progress = 0
                         myToolBar.visibility = View.VISIBLE
-                        SESSION_TYPE = SessionType.BREAK
                         cancel()
-                        tv_countdown.setText("HH:MM:SS")
+                        progress_countdown.progress = 0
+                        view?.tv_countdown?.setText("HH:MM:SS")
                         longBreakEligibilityToggle()
-                        // Break Button
-                        //LONG BREAK
+
                         if(LONG_BREAK_ELIGIBLE) {
-                            Log.d("CheckedTasks", FinishedTasks.CHECKED_OFF_TASKS.toString())
-                            Log.d("RequiredTasks", FinishedTasks.REQUIRED_TASKS.toString())
-                            Log.d("WORK TIMER", "LONG BREAK ELIGIBLE!")
-                            longBreakColor()
-                            btn_startLongBreakNow.setOnClickListener {
-                                myToolBar.visibility = View.INVISIBLE
-                                activity?.actionBar?.hide()
+                             view?.btn_startLongBreakNow?.setOnClickListener {
                                 SESSION_TYPE = SessionType.LONG_BREAK
                                 longBreakTimer()
                             }
 
-                            btn_startLongBreakNow.visibility = View.VISIBLE
-                            tv_countdown.visibility = View.INVISIBLE
-                            tv_workText.visibility = View.INVISIBLE
-                            btn_stop.visibility = View.INVISIBLE
-                            btn_pause.visibility = View.INVISIBLE
-//                            btn_break.visibility = View.INVISIBLE
+                            view?.btn_startLongBreakNow?.visibility = View.VISIBLE
+                            view?.tv_countdown?.visibility = View.INVISIBLE
+                            view?.tv_workText?.visibility = View.INVISIBLE
+                            view?.btn_stop?.visibility = View.INVISIBLE
+                            view?.btn_pause?.visibility = View.INVISIBLE
+                            //                            view.btn_break.visibility = View.INVISIBLE
 
                             // Change color
-
-                        }else {
+                            longBreakColor()
+                        }else{
                             //SHORT BREAK
-                            Log.d("CheckedTasks", FinishedTasks.CHECKED_OFF_TASKS.toString())
-                            Log.d("RequiredTasks", FinishedTasks.REQUIRED_TASKS.toString())
-                            Log.d("WORK TIMER", "NOT LONG BREAK ELIGIBLE!")
-                            breakColor()
-                            btn_startBreakNow.setOnClickListener {
-                                myToolBar.visibility = View.INVISIBLE
-                                activity?.actionBar?.hide()
+                            view?.btn_startBreakNow?.setOnClickListener {
                                 SESSION_TYPE = SessionType.BREAK
-                                btn_startBreakNow.visibility = View.VISIBLE
+                                view?.btn_startBreakNow?.visibility = View.VISIBLE
                                 breakTimer()
 
                             }
-                            btn_startBreakNow.visibility = View.VISIBLE
-                            tv_countdown.visibility = View.INVISIBLE
-                            tv_workText.visibility = View.INVISIBLE
-                            btn_stop.visibility = View.INVISIBLE
-                            btn_pause.visibility = View.INVISIBLE
-//                            btn_break.visibility = View.INVISIBLE
+                            view?.btn_startBreakNow?.visibility = View.VISIBLE
+                            view?.tv_countdown?.visibility = View.INVISIBLE
+                            view?.tv_workText?.visibility = View.INVISIBLE
+                            view?.btn_stop?.visibility = View.INVISIBLE
+                            view?.btn_pause?.visibility = View.INVISIBLE
+                            //                            view.btn_break.visibility = View.INVISIBLE
 
                             // Change color
-
+                            breakColor()
                         }
 
                     }
                 }.start()
-                btn_start.visibility = View.INVISIBLE // Work Button
-                tv_countdown.visibility = View.VISIBLE
-                tv_workText.visibility = View.VISIBLE
-                btn_stop.visibility = View.VISIBLE
-                btn_pause.visibility = View.VISIBLE
+                view?.btn_start?.visibility = View.INVISIBLE // Work Button
+                view?.tv_countdown?.visibility = View.VISIBLE
+                view?.tv_workText?.visibility = View.VISIBLE
+                view?.btn_stop?.visibility = View.VISIBLE
+                view?.btn_pause?.visibility = View.VISIBLE
             }
         }
 
-        // Stop Button
 
         view?.btn_pause?.setOnClickListener{
             timer.cancel()
             view?.btn_pause?.visibility = View.INVISIBLE
             view?.btn_startPause?.visibility = View.VISIBLE
-
         }
 
         // Focus Start-Pause Button
@@ -408,7 +437,11 @@ class WorkFragment : Fragment(){
             view?.btn_pause?.visibility = View.VISIBLE
             view?.btn_startPause?.visibility = View.INVISIBLE
 
-            var timeInput = arguments?.getString("focus")
+            if(focus == "null") {
+                timeInput = arguments?.getString("focus").toString()
+            }else{
+                timeInput = focus
+            }
             var timeStart = timeInput.toString()
 
             // CountDownTimer
@@ -419,7 +452,7 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000 - currentTime).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000*60 - currentTime).toInt()
 
                 }
 
@@ -476,24 +509,28 @@ class WorkFragment : Fragment(){
         myToolBar.visibility = View.VISIBLE
         SESSION_TYPE = SessionType.BREAK
         breakColor()
-        var timeInput = arguments?.getString("break")
+        if(shortBreak == "null") {
+            timeInput = arguments?.getString("focus").toString()
+        }else{
+            timeInput = shortBreak
+        }
         var timeStart = timeInput.toString()
         tv_workText.setText("Break")
 
-        if (timeInput.isNullOrBlank()) {
+        if (timeInput == "null") {
             Toast.makeText(context, "Set a break time first", Toast.LENGTH_SHORT).show()
         } else {
-            progress_countdown.max = timeStart.toInt() * 1000
+            progress_countdown.max = timeStart.toInt() * 1000 * 60
             myToolBar.visibility = View.INVISIBLE
             // CountDownTimer
-            timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
+            timer = object: CountDownTimer(timeStart.toLong() * 1000 * 60, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime = millisUntilFinished
                     tv_countdown.text = "" + String.format("%d:%d:%d",
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
 
                 }
                 override fun onFinish() {
@@ -530,7 +567,11 @@ class WorkFragment : Fragment(){
         btn_startPause.setOnClickListener {
             btn_pause.visibility = View.VISIBLE
             btn_startPause.visibility = View.INVISIBLE
-            var timeInput = arguments?.getString("break")
+            if(shortBreak == "null") {
+                timeInput = arguments?.getString("break").toString()
+            }else{
+                timeInput = shortBreak
+            }
             var timeStart = timeInput.toString()
             // CountDownTimer
             timer = object : CountDownTimer(currentTime*1, 1000) {
@@ -540,7 +581,7 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
 
                 }
 
@@ -548,7 +589,6 @@ class WorkFragment : Fragment(){
                     progress_countdown.progress = 0
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
-
 
                     btn_start.visibility = View.VISIBLE
 
@@ -576,18 +616,22 @@ class WorkFragment : Fragment(){
         myToolBar.visibility = View.VISIBLE
         SESSION_TYPE = SessionType.LONG_BREAK
         longBreakColor()
-        var checkedTaskRequirement = arguments?.getString("checkedTasks")
-        var timeInput = arguments?.getString("longBreak")
+
+        if(longBreak == "null") {
+            timeInput = arguments?.getString("longBreak").toString()
+        }else{
+            timeInput = longBreak
+        }
         var timeStart = timeInput.toString()
         tv_workText.setText("Long Break")
 
-        if (timeInput.isNullOrBlank()) {
+        if (timeInput == "null") {
             Toast.makeText(context, "Set a long break time first", Toast.LENGTH_SHORT).show()
         } else {
-            progress_countdown.max = timeStart.toInt() * 1000
+            progress_countdown.max = timeStart.toInt() * 1000 * 60
             myToolBar.visibility = View.INVISIBLE
             // CountDownTimer
-            timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
+            timer = object: CountDownTimer(timeStart.toLong() * 1000 * 60, 1000) {
 
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime = millisUntilFinished
@@ -595,7 +639,7 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
 
                 }
                 override fun onFinish() {
@@ -604,12 +648,12 @@ class WorkFragment : Fragment(){
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
 
-                    Log.d("TASK REQ: ", checkedTaskRequirement.toString())
+                    Log.d("TASK REQ: ", checkedTasks.toString())
 
 //                  Decrease the number of long break elibility credits
-                    FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS - (checkedTaskRequirement?.toInt()?: 0)
+                    breakPoints.value = breakPoints.value?.minus((checkedTasks?.toInt()?:0))
                     longBreakEligibilityToggle()
-                    Log.d("LONGBREAKDONETASKS", FinishedTasks.CHECKED_OFF_TASKS.toString())
+                    Log.d("LONGBREAKDONETASKS", FinishedTasks.LONG_BREAK_CREDITS.toString())
                     Log.d("LB -ELIGIBILITY?", LONG_BREAK_ELIGIBLE.toString())
 
                     workTimer()
@@ -640,7 +684,7 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
 
 
                 }
@@ -658,9 +702,11 @@ class WorkFragment : Fragment(){
                     btn_pause.visibility = View.INVISIBLE
                     tv_workText.setText("Focus")
 
-                    FinishedTasks.CHECKED_OFF_TASKS = FinishedTasks.CHECKED_OFF_TASKS - (checkedTaskRequirement?.toInt()?: 0)
+                    FinishedTasks.LONG_BREAK_CREDITS = FinishedTasks.LONG_BREAK_CREDITS - (checkedTasks?.toInt()?: 0)
+                    breakPoints.value = breakPoints.value?.minus((checkedTasks?.toInt()?:0))
+
                     longBreakEligibilityToggle()
-                    Log.d("LONGBREAKDONETASKS", FinishedTasks.CHECKED_OFF_TASKS.toString())
+                    Log.d("LONGBREAKDONETASKS", FinishedTasks.LONG_BREAK_CREDITS.toString())
                     Log.d("LB -ELIGIBILITY?", LONG_BREAK_ELIGIBLE.toString())
 
                     focusColor()
@@ -672,36 +718,53 @@ class WorkFragment : Fragment(){
 
     // Change color of break view
     fun breakColor() {
-        myToolBar.setBackgroundColor(Color.parseColor("#99d5ca"))
-        btn_startBreakNow.setColorFilter(Color.parseColor("#99d5ca"))
-        btn_stop.setColorFilter(Color.parseColor("#99d5ca"))
-        btn_pause.setColorFilter(Color.parseColor("#99d5ca"))
-        btn_add.setColorFilter(Color.parseColor("#99d5ca"))
+        var focusFrag = frag_work
+        focusFrag.setBackgroundResource(R.drawable.gradient_break_list)
+        var animationDrawable: AnimationDrawable = focusFrag.background as AnimationDrawable
+        animationDrawable.setEnterFadeDuration(10)
+        animationDrawable.setExitFadeDuration(500)
+        animationDrawable.start()
     }
 
     // Change color of long break view
     fun longBreakColor() {
-        myToolBar.setBackgroundColor(Color.parseColor("#b391b5"))
-        btn_startLongBreakNow.setColorFilter(Color.parseColor("#b391b5"))
-        btn_stop.setColorFilter(Color.parseColor("#b391b5"))
-        btn_pause.setColorFilter(Color.parseColor("#b391b5"))
-        btn_add.setColorFilter(Color.parseColor("#b391b5"))
+        var focusFrag = frag_work
+        focusFrag.setBackgroundResource(R.drawable.gradient_long_list)
+        var animationDrawable: AnimationDrawable = focusFrag.background as AnimationDrawable
+        animationDrawable.setEnterFadeDuration(10)
+        animationDrawable.setExitFadeDuration(500)
+        animationDrawable.start()
     }
 
-    // Change color of long break view
+    // Change color of focus view
     fun focusColor() {
-        myToolBar.setBackgroundColor(Color.parseColor("#ffbbb1"))
-        btn_startBreakNow.setColorFilter(Color.parseColor("#ffbbb1"))
-        btn_stop.setColorFilter(Color.parseColor("#ffbbb1"))
-        btn_pause.setColorFilter(Color.parseColor("#ffbbb1"))
-        btn_add.setColorFilter(Color.parseColor("#ffbbb1"))
-        btn_startPause.setColorFilter(Color.parseColor("#ffbbb1"))
+        var focusFrag = frag_work
+        focusFrag.setBackgroundResource(R.drawable.gradient_focus_list)
+        var animationDrawable: AnimationDrawable = focusFrag.background as AnimationDrawable
+        animationDrawable.setEnterFadeDuration(10)
+        animationDrawable.setExitFadeDuration(500)
+        animationDrawable.start()
     }
 
+    //Changes Long Break Eligibility State based on number of Doro Points and the set required task
+    //Toggles the state LONG_BREAK_ELIGIBLE, if true, timer proceeds to Long Break after Focus Session
+    fun longBreakEligibilityToggle(){
+        if(breakPoints.value!! >= checkedTasks.toInt()){
+            Log.d("Toggle", FinishedTasks.LONG_BREAK_CREDITS.toString())
+            Log.d("Toggle", FinishedTasks.REQUIRED_TASKS.toString())
+            LONG_BREAK_ELIGIBLE = true
+        }else{
+            LONG_BREAK_ELIGIBLE = false
+        }
+        Log.d("Toggle", LONG_BREAK_ELIGIBLE.toString())
+    }
+
+
+    //DATABASE FUNCTIONS
     fun saveRecord(){
         val title = et_task.text.toString()
         val isChecked = false
-        val databaseHandler: DatabaseHandler = DatabaseHandler(context!!)
+        databaseHandler = DatabaseHandler(context!!)
         if(title.trim()!=""){
             val status = databaseHandler.addTodo(TodoModelClass(id = 0, title, isChecked))
             if(status > -1){
@@ -711,33 +774,44 @@ class WorkFragment : Fragment(){
         }else{
             Toast.makeText(activity?.applicationContext, "You cannot enter a blank task", Toast.LENGTH_LONG).show()
         }
-
         viewRecord()
-
     }
+
     //method for read records from database in ListView
     fun viewRecord(){
         //creating the instance of DatabaseHandler class
-        val databaseHandler: DatabaseHandler = DatabaseHandler(context!!)
+        databaseHandler = DatabaseHandler(context!!)
         //calling the viewEmployee method of DatabaseHandler class to read the records
-        val emp: MutableList<TodoModelClass> = databaseHandler.viewTasks() as MutableList<TodoModelClass>
+        todoList = databaseHandler.viewTasks() as MutableList<TodoModelClass>
         //creating custom ArrayAdapter
-        val myListAdapter = RVTodoAdapter(activity!!, emp)
+        myListAdapter = RVTodoAdapter(activity!!, todoList)
         rv_todo_list.adapter = myListAdapter
         rv_todo_list.layoutManager = LinearLayoutManager(context)
+        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(rv_todo_list)
     }
 
-    //
-    //Changes Long Break Eligibility State based on number of checked off task on todo list
-    fun longBreakEligibilityToggle(){
-        if(FinishedTasks.CHECKED_OFF_TASKS >= FinishedTasks.REQUIRED_TASKS){
-            Log.d("Toggle", FinishedTasks.CHECKED_OFF_TASKS.toString())
-            Log.d("Toggle", FinishedTasks.REQUIRED_TASKS.toString())
-            LONG_BREAK_ELIGIBLE = true
-        }else{
-            LONG_BREAK_ELIGIBLE = false
+    fun deleteTodo(todo: TodoModelClass){
+        todoList.remove(todo)
+        databaseHandler = DatabaseHandler(context!!)
+        databaseHandler.deleteTodo(todo)
+    }
+
+
+    //Swipe right to delete feature
+    var itemTouchHelperCallback: ItemTouchHelper.SimpleCallback =
+        object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                deleteTodo(myListAdapter.getTodoList()[viewHolder.adapterPosition])
+                myListAdapter.notifyDataSetChanged()
+            }
         }
-        Log.d("Toggle", LONG_BREAK_ELIGIBLE.toString())
 
-    }
 }

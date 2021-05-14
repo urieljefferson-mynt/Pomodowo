@@ -2,9 +2,12 @@ package ph.apper.android.pagatpatan.pomodowo
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -22,33 +25,37 @@ class SettingsFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
 
-        val sharedPreferences: SharedPreferences = this.activity!!.getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
 
-        val focus: String? = sharedPreferences.getString("focus", null)
-        val shortBreak: String? = sharedPreferences.getString("break", null)
-        val longBreak: String? = sharedPreferences.getString("longBreak", null)
-        val checkedTasks: String? = sharedPreferences.getString("checkedTasks", null)
-        Log.d("SHAREDPREFSS", "$focus, $shortBreak, $longBreak, $checkedTasks")
+        val sharedPreferences: SharedPreferences? = this.activity?.getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
+
+        //Restores the position of the seekbar from the latest user settings.
+        val focus: String? = sharedPreferences?.getString("focus", null)
+        val shortBreak: String? = sharedPreferences?.getString("break", null)
+        val longBreak: String? = sharedPreferences?.getString("longBreak", null)
+        val checkedTasks: String? = sharedPreferences?.getString("checkedTasks", null)
+        Log.d("SHAREDPREFS", "$focus, $shortBreak, $longBreak, $checkedTasks")
 
 
+        //Sets the seekbar position to default in case there is no existing previous user setting
+        Log.d("SEEK", "$focus, $shortBreak, $longBreak, $checkedTasks")
+        view.sb_break.progress = shortBreak?.toInt() ?: 50
+        view.sb_focus.progress = focus?.toInt() ?: 50
+        view.sb_longBreak.progress = longBreak?.toInt() ?: 50
+        view.sb_completeTask.progress = checkedTasks?.toInt() ?: 5
 
-            Log.d("SEEK", "$focus, $shortBreak, $longBreak, $checkedTasks")
-            view.sb_break.progress = shortBreak?.toInt() ?: 50
-            view.sb_focus.progress = focus?.toInt() ?: 50
-            view.sb_longBreak.progress = longBreak?.toInt() ?: 50
-            view.sb_completeTask.progress = checkedTasks?.toInt() ?: 5
-
-            view.tv_focusDuration.text = view.sb_focus.progress.toString()
-            view.tv_breakDuration.text = view.sb_break.progress.toString()
-            view.tv_longBreakDuration.text = view.sb_longBreak.progress.toString()
-            view.tv_completeTask.text = view.sb_completeTask.progress.toString()
+        //Set text depending on seekbar position
+        view.tv_focusDuration.text = view.sb_focus.progress.toString()
+        view.tv_breakDuration.text = view.sb_break.progress.toString()
+        view.tv_longBreakDuration.text = view.sb_longBreak.progress.toString()
+        view.tv_completeTask.text = view.sb_completeTask.progress.toString()
 
         Log.d("SEEK", "NOT CALLED")
 
         // Action Bar Buttons
         view.ic_menu.visibility = View.INVISIBLE
         view.ic_arrow_back.setOnClickListener{
-            workFragment(savedInstanceState)
+//            workFragment(savedInstanceState)
+            this.fragmentManager?.popBackStackImmediate()
         }
 
         // Communicator
@@ -145,6 +152,11 @@ class SettingsFragment : Fragment() {
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        settingsColor()
+    }
+
     fun workFragment(savedInstanceState: Bundle?) {
             val fragment = WorkFragment()
             val fragmentManager = activity!!.supportFragmentManager
@@ -154,6 +166,16 @@ class SettingsFragment : Fragment() {
 //            fragmentTransaction.addToBackStack(null)
             fragmentTransaction.commit()
 
+    }
+
+    //Setting fragment theme
+    fun settingsColor() {
+        var focusFrag = frag_settings
+        focusFrag.setBackgroundResource(R.drawable.gradient_settings_list)
+        var animationDrawable: AnimationDrawable = focusFrag.background as AnimationDrawable
+        animationDrawable.setEnterFadeDuration(10)
+        animationDrawable.setExitFadeDuration(500)
+        animationDrawable.start()
     }
 
 
