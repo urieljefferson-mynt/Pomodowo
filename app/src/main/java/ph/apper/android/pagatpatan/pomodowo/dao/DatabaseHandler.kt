@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.example.todolistjeff.model.TodoModelClass
+import ph.apper.android.pagatpatan.pomodowo.WorkFragment
 
 class DatabaseHandler(context: Context): SQLiteOpenHelper(context,
     DATABASE_NAME,null,
@@ -20,12 +21,13 @@ class DatabaseHandler(context: Context): SQLiteOpenHelper(context,
         private val KEY_ID = "id"
         private val KEY_TITLE = "title"
         private val KEY_STATUS = "isChecked"
+        private val KEY_PRIORITY = "priority"
     }
     override fun onCreate(db: SQLiteDatabase?) {
         //creating table with fields
         val CREATE_CONTACTS_TABLE = ("CREATE TABLE " + TABLE_CONTACTS + "("
                 + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT,"
-                + KEY_STATUS + " TEXT" + ")")
+                + KEY_STATUS + " TEXT," + KEY_PRIORITY + " TEXT" + ")") //Should be int??
         db?.execSQL(CREATE_CONTACTS_TABLE)
     }
 
@@ -41,6 +43,7 @@ class DatabaseHandler(context: Context): SQLiteOpenHelper(context,
         val contentValues = ContentValues()
         contentValues.put(KEY_TITLE, emp.title) // EmpModelClass Name
         contentValues.put(KEY_STATUS,emp.isChecked ) // EmpModelClass Phone
+        contentValues.put(KEY_PRIORITY, emp.priority)
         // Inserting Row
         val success = db.insert(TABLE_CONTACTS, null, contentValues)
         //2nd argument is String containing nullColumnHack
@@ -62,13 +65,15 @@ class DatabaseHandler(context: Context): SQLiteOpenHelper(context,
         var id: Int
         var title: String
         var isChecked: Boolean
+        var priority: String
         if (cursor.moveToFirst()) {
             do {
                 id = cursor.getInt(cursor.getColumnIndex("id"))
                 title = cursor.getString(cursor.getColumnIndex("title"))
                 //Retrieve checkbox state from database
                 isChecked = cursor.getInt(cursor.getColumnIndex("isChecked")).toBoolean() //Prinoblema ko to ng ilang araw hahaha
-                val todo= TodoModelClass(title = title, isChecked = isChecked, id = id)
+                priority = cursor.getString(cursor.getColumnIndex("priority"))
+                val todo= TodoModelClass(title = title, isChecked = isChecked, id = id, priority = priority)
                 taskList.add(todo)
             } while (cursor.moveToNext())
         }
@@ -80,10 +85,12 @@ class DatabaseHandler(context: Context): SQLiteOpenHelper(context,
         val contentValues = ContentValues()
         contentValues.put(KEY_TITLE, emp.title) // EmpModelClass Name
         contentValues.put(KEY_STATUS,emp.isChecked ) // EmpModelClass Email
+        contentValues.put(KEY_PRIORITY, emp.priority)
 
         // Updating Row
         val success = db.update(TABLE_CONTACTS, contentValues,"id = ${emp.id}",null)
         Log.d("UPDATING", emp.title + " " + emp.isChecked.toString())
+
         //2nd argument is String containing nullColumnHack
         db.close() // Closing database connection
         return success

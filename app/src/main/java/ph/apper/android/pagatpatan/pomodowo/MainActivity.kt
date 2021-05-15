@@ -65,7 +65,4 @@ class MainActivity : AppCompatActivity(), Communicator{
             putInt("longBreakCredits", longBreakCredits)
         }.apply()
     }
-
-
-
 }

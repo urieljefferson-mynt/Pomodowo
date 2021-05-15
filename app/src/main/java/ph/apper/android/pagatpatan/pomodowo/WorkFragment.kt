@@ -7,10 +7,13 @@ import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
@@ -43,6 +46,7 @@ class WorkFragment : Fragment(){
         private lateinit var myListAdapter: RVTodoAdapter
         private lateinit var todoList: MutableList<TodoModelClass>
         private lateinit var databaseHandler: DatabaseHandler
+        private lateinit var todoPriority: String
         private var currentTime : Long = 0
         var LONG_BREAK_ELIGIBLE = false
 //        var SESSION_STARTED = false
@@ -55,7 +59,6 @@ class WorkFragment : Fragment(){
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
 
-
         val view = inflater.inflate(R.layout.fragment_work, container, false)
 
         //Load persisted user settings data
@@ -63,7 +66,7 @@ class WorkFragment : Fragment(){
         val persistentCredits: SharedPreferences? = this.activity?.getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
 //        val longBreakCredits: Int? = sharedPreferences.getInt("longBreakCredits", 0)
 
-        view.myToolBar.visibility = View.VISIBLE
+//        view.myToolBar.visibility = View.VISIBLE
 
 
         //Assigning saved user settings from shared preferences
@@ -84,6 +87,12 @@ class WorkFragment : Fragment(){
         breakPoints.observe(this, Observer {
                 newValue ->
                 tv_credits.text = "Pomo Points: $newValue"
+                //Delay refresh view for better UI reaction
+                Handler().postDelayed({
+                    viewRecord()
+                }, 1000)
+
+            viewRecord()
                 val editor: SharedPreferences.Editor? = persistentCredits?.edit()
                 editor?.apply {
                     putInt("breakPoints", newValue)
@@ -96,6 +105,21 @@ class WorkFragment : Fragment(){
         view.ic_menu.setOnClickListener{
             settingsFragment(savedInstanceState)
         }
+
+        // Create an ArrayAdapter using the string array and a default spinner layout
+
+
+//        ArrayAdapter.createFromResource(
+//            this,
+//            R.array.priority_array,
+//            android.R.layout.simple_spinner_item
+//        ).also { adapter ->
+//            // Specify the layout to use when the list of choices appears
+//            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//            // Apply the adapter to the spinner
+//            spinner_priority.adapter = adapter
+//        }
+
 
 
 
@@ -146,7 +170,7 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
 
                 }
 
@@ -210,6 +234,22 @@ class WorkFragment : Fragment(){
         // toolbar title
         activity!!.title = ""
 
+        spinner_priority.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                todoPriority = parent?.getItemAtPosition(position).toString()
+                Log.d("PRIORITY", "${parent?.getItemAtPosition(position).toString()}")
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
+
 
 
         //Initialize todo list and focus timer
@@ -236,7 +276,7 @@ class WorkFragment : Fragment(){
 
 
     fun workTimer(){
-        myToolBar.visibility = View.VISIBLE
+        view?.myToolBar?.visibility = View.VISIBLE
         longBreakEligibilityToggle()
         focusColor()
 
@@ -266,11 +306,11 @@ class WorkFragment : Fragment(){
             } else {
                 myToolBar.visibility = View.INVISIBLE
                 var timeStart = timeInput.toString()
-                progress_countdown.max = timeStart.toInt() * 1000 * 60
+                progress_countdown.max = timeStart.toInt() * 1000
 
 
                 // CountDownTimer
-                timer = object: CountDownTimer(timeStart.toLong() * 1000 * 60, 1000) {
+                timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
                     override fun onTick(millisUntilFinished: Long) {
                         currentTime = millisUntilFinished
                         tv_countdown.text = "" + String.format("%d:%d:%d",
@@ -278,7 +318,7 @@ class WorkFragment : Fragment(){
                             TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                             TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
 
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
                     }
 
                     override fun onFinish() {
@@ -360,7 +400,7 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - currentTime).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000 - currentTime).toInt()
 
                 }
 
@@ -428,17 +468,17 @@ class WorkFragment : Fragment(){
         if (timeInput == "null") {
             Toast.makeText(context, "Set a break time first", Toast.LENGTH_SHORT).show()
         } else {
-            progress_countdown.max = timeStart.toInt() * 1000 * 60
+            progress_countdown.max = timeStart.toInt() * 1000
             myToolBar.visibility = View.INVISIBLE
             // CountDownTimer
-            timer = object: CountDownTimer(timeStart.toLong() * 1000 * 60, 1000) {
+            timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime = millisUntilFinished
                     tv_countdown.text = "" + String.format("%d:%d:%d",
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()* 1000 - millisUntilFinished).toInt()
 
                 }
                 override fun onFinish() {
@@ -489,7 +529,7 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()* 1000 - millisUntilFinished).toInt()
 
                 }
 
@@ -536,10 +576,10 @@ class WorkFragment : Fragment(){
         if (timeInput == "null") {
             Toast.makeText(context, "Set a long break time first", Toast.LENGTH_SHORT).show()
         } else {
-            progress_countdown.max = timeStart.toInt() * 1000 * 60
+            progress_countdown.max = timeStart.toInt() * 1000
             myToolBar.visibility = View.INVISIBLE
             // CountDownTimer
-            timer = object: CountDownTimer(timeStart.toLong() * 1000 * 60, 1000) {
+            timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
 
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime = millisUntilFinished
@@ -547,7 +587,7 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
 
                 }
                 override fun onFinish() {
@@ -592,7 +632,7 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
 
 
                 }
@@ -672,9 +712,10 @@ class WorkFragment : Fragment(){
     fun saveRecord(){
         val title = et_task.text.toString()
         val isChecked = false
+        val priority = todoPriority
         databaseHandler = DatabaseHandler(context!!)
         if(title.trim()!=""){
-            val status = databaseHandler.addTodo(TodoModelClass(id = 0, title, isChecked))
+            val status = databaseHandler.addTodo(TodoModelClass(id = 0, title, isChecked, priority = priority))
             if(status > -1){
                 Toast.makeText(activity?.applicationContext, "New task added", Toast.LENGTH_LONG).show()
                 et_task.text.clear()
@@ -691,6 +732,10 @@ class WorkFragment : Fragment(){
         databaseHandler = DatabaseHandler(context!!)
         //calling the viewEmployee method of DatabaseHandler class to read the records
         todoList = databaseHandler.viewTasks() as MutableList<TodoModelClass>
+        todoList.sortBy { it.isChecked }
+
+
+
         //creating custom ArrayAdapter
         myListAdapter = RVTodoAdapter(activity!!, todoList)
         rv_todo_list.adapter = myListAdapter
@@ -723,5 +768,4 @@ class WorkFragment : Fragment(){
                 myListAdapter.notifyDataSetChanged()
             }
         }
-
 }

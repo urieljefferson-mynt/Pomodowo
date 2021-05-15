@@ -31,8 +31,21 @@
                 android:textSize="20sp"
                 android:textColor="#000000"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/cb_done"
+                app:layout_constraintEnd_toStartOf="@+id/tv_task_priority"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_task_priority"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="HIGH"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:textAlignment="center"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/cb_done"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <CheckBox

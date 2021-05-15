@@ -66,8 +66,6 @@ class RVTodoAdapter(private val context: Activity, private var todos: MutableLis
         holder.itemView.apply {
 
             cb_done.setTag(todo)
-
-
             tv_todo_title.text = todo.title
             Log.d("TODO TITLE", todo.title)
             Log.d("LOGIC TEST", (1 or 0).toString())
@@ -79,11 +77,20 @@ class RVTodoAdapter(private val context: Activity, private var todos: MutableLis
             var updatedTodotitle = todo.title
             var updatedTodoisChecked = todo.isChecked
             var updatedTodoid = todo.id
-            updatedTodo = TodoModelClass(updatedTodoid, updatedTodotitle, updatedTodoisChecked)
+            var updatedTodoPriority = todo.priority
+            tv_task_priority.text = updatedTodoPriority
+//                when(updatedTodoPriority){
+//                "LOW" -> tv_task_priority.setTextColor(0x1153422)
+//                "MEDIUM" -> tv_task_priority.setTextColor(0xe9c46a)
+//                "HIGH" -> tv_task_priority.setTextColor(0xd00000)
+//            }
+
+            updatedTodo = TodoModelClass(updatedTodoid, updatedTodotitle, updatedTodoisChecked, updatedTodoPriority)
 
 
 
             toggleColorChange(tv_todo_title, todo.isChecked, updatedTodo)
+
             cb_done.setTag(todo)
 
 

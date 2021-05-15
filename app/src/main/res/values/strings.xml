@@ -2,4 +2,12 @@
     <string name="app_name">Pomodowo</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string-array name="priority_array">
+        <item>HIGH</item>
+        <item>MEDIUM</item>
+        <item>LOW</item>
+
+
+    </string-array>
+
 </resources>
