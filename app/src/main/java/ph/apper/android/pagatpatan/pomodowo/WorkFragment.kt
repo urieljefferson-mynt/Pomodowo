@@ -7,10 +7,13 @@ import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
@@ -43,8 +46,10 @@ class WorkFragment : Fragment(){
         private lateinit var myListAdapter: RVTodoAdapter
         private lateinit var todoList: MutableList<TodoModelClass>
         private lateinit var databaseHandler: DatabaseHandler
+        private lateinit var todoPriority: String
         private var currentTime : Long = 0
         var LONG_BREAK_ELIGIBLE = false
+        var SESSION_STARTED = false
 //        var SESSION_STARTED = false
         var SESSION_TYPE: SessionType =  SessionType.FOCUS
         var breakPoints: MutableLiveData<Int> = MutableLiveData(0)
@@ -55,7 +60,6 @@ class WorkFragment : Fragment(){
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
 
-
         val view = inflater.inflate(R.layout.fragment_work, container, false)
 
         //Load persisted user settings data
@@ -63,7 +67,7 @@ class WorkFragment : Fragment(){
         val persistentCredits: SharedPreferences? = this.activity?.getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
 //        val longBreakCredits: Int? = sharedPreferences.getInt("longBreakCredits", 0)
 
-        view.myToolBar.visibility = View.VISIBLE
+//        view.myToolBar.visibility = View.VISIBLE
 
 
         //Assigning saved user settings from shared preferences
@@ -84,6 +88,12 @@ class WorkFragment : Fragment(){
         breakPoints.observe(this, Observer {
                 newValue ->
                 tv_credits.text = "Pomo Points: $newValue"
+                //Delay refresh view for better UI reaction
+                Handler().postDelayed({
+                    viewRecord()
+                }, 800)
+
+            viewRecord()
                 val editor: SharedPreferences.Editor? = persistentCredits?.edit()
                 editor?.apply {
                     putInt("breakPoints", newValue)
@@ -99,10 +109,12 @@ class WorkFragment : Fragment(){
 
 
 
+
         // Stop Button
         view.btn_stop.setOnClickListener{
-            myToolBar.visibility = View.VISIBLE
+            view?.myToolBar?.visibility = View.VISIBLE
             progress_countdown.progress = 0
+            myListAdapter.checkBoxVisibility(false)
 
             timer.cancel()
             view.btn_stop.visibility = View.INVISIBLE
@@ -122,6 +134,7 @@ class WorkFragment : Fragment(){
         // Pause Button
         view.btn_pause.setOnClickListener{
             timer.cancel()
+            myListAdapter.checkBoxVisibility(false)
             view.btn_pause.visibility = View.INVISIBLE
             view.btn_startPause.visibility = View.VISIBLE
 
@@ -146,7 +159,7 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
 
                 }
 
@@ -201,7 +214,7 @@ class WorkFragment : Fragment(){
     // Add To do List
     override fun onViewCreated(view: View, savedInstanceState: Bundle?)  {
         super.onViewCreated(view, savedInstanceState)
-
+        //Cannot edit checkboxes while timer isn't running
         //Add Todo Button
         btn_add.setOnClickListener{ view ->
             Log.d("btn_add", "Selected")
@@ -210,11 +223,26 @@ class WorkFragment : Fragment(){
         // toolbar title
         activity!!.title = ""
 
+        spinner_priority.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                todoPriority = parent?.getItemAtPosition(position).toString()
+                Log.d("PRIORITY", "${parent?.getItemAtPosition(position).toString()}")
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
 
 
         //Initialize todo list and focus timer
-        viewRecord()
         focusColor()
+        viewRecord()
         workTimer()
     }
 
@@ -236,7 +264,9 @@ class WorkFragment : Fragment(){
 
 
     fun workTimer(){
-        myToolBar.visibility = View.VISIBLE
+        myListAdapter.checkBoxVisibility(false)
+        view?.myToolBar?.visibility = View.VISIBLE
+        view?.tv_toolbar?.text = "Focus"
         longBreakEligibilityToggle()
         focusColor()
 
@@ -253,6 +283,7 @@ class WorkFragment : Fragment(){
         tv_workText.setText("Focus")
         // Start Button
         view?.btn_start?.setOnClickListener {
+            SESSION_STARTED = true
             if(focus == "null") {
                 timeInput = arguments?.getString("focus").toString()
             }else{
@@ -264,13 +295,14 @@ class WorkFragment : Fragment(){
             if (timeInput == "null") {
                 Toast.makeText(context, "Set a focus time first", Toast.LENGTH_SHORT).show()
             } else {
-                myToolBar.visibility = View.INVISIBLE
+                view?.myToolBar?.visibility = View.INVISIBLE
+                myListAdapter.checkBoxVisibility(true)
                 var timeStart = timeInput.toString()
-                progress_countdown.max = timeStart.toInt() * 1000 * 60
+                progress_countdown.max = timeStart.toInt() * 1000
 
 
                 // CountDownTimer
-                timer = object: CountDownTimer(timeStart.toLong() * 1000 * 60, 1000) {
+                timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
                     override fun onTick(millisUntilFinished: Long) {
                         currentTime = millisUntilFinished
                         tv_countdown.text = "" + String.format("%d:%d:%d",
@@ -278,11 +310,13 @@ class WorkFragment : Fragment(){
                             TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                             TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
 
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
                     }
 
                     override fun onFinish() {
-                        myToolBar.visibility = View.VISIBLE
+                        SESSION_STARTED = false
+                        view?.myToolBar?.visibility = View.VISIBLE
+                        myListAdapter.checkBoxVisibility(false)
                         cancel()
                         progress_countdown.progress = 0
                         view?.tv_countdown?.setText("HH:MM:SS")
@@ -293,6 +327,7 @@ class WorkFragment : Fragment(){
                                 SESSION_TYPE = SessionType.LONG_BREAK
                                 longBreakTimer()
                             }
+                            view?.tv_toolbar?.text = "Long Break"
 
                             view?.btn_startLongBreakNow?.visibility = View.VISIBLE
                             view?.tv_countdown?.visibility = View.INVISIBLE
@@ -311,6 +346,7 @@ class WorkFragment : Fragment(){
                                 breakTimer()
 
                             }
+                            view?.tv_toolbar?.text = "Break"
                             view?.btn_startBreakNow?.visibility = View.VISIBLE
                             view?.tv_countdown?.visibility = View.INVISIBLE
                             view?.tv_workText?.visibility = View.INVISIBLE
@@ -335,6 +371,8 @@ class WorkFragment : Fragment(){
 
         view?.btn_pause?.setOnClickListener{
             timer.cancel()
+            SESSION_STARTED = false
+            myListAdapter.checkBoxVisibility(false)
             view?.btn_pause?.visibility = View.INVISIBLE
             view?.btn_startPause?.visibility = View.VISIBLE
         }
@@ -342,6 +380,8 @@ class WorkFragment : Fragment(){
         // Focus Start-Pause Button
         view?.btn_startPause?.setOnClickListener {
             longBreakEligibilityToggle()
+            SESSION_STARTED = true
+            myListAdapter.checkBoxVisibility(true)
             view?.btn_pause?.visibility = View.VISIBLE
             view?.btn_startPause?.visibility = View.INVISIBLE
 
@@ -360,14 +400,17 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - currentTime).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000 - currentTime).toInt()
 
                 }
 
                 override fun onFinish() {
+                    SESSION_STARTED = false
+                    myListAdapter.checkBoxVisibility(false)
                     progress_countdown.progress = 0
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
+
 
                     if(LONG_BREAK_ELIGIBLE) {
                         view?.btn_startLongBreakNow?.setOnClickListener {
@@ -375,7 +418,7 @@ class WorkFragment : Fragment(){
                             SESSION_TYPE = SessionType.LONG_BREAK
                             longBreakTimer()
                         }
-
+                        view?.tv_toolbar?.text = "Long Break"
                         view?.btn_startLongBreakNow?.visibility = View.VISIBLE
                         view?.tv_countdown?.visibility = View.INVISIBLE
                         view?.tv_workText?.visibility = View.INVISIBLE
@@ -394,6 +437,7 @@ class WorkFragment : Fragment(){
                             breakTimer()
 
                         }
+                        view?.tv_toolbar?.text = "Break"
                         view?.btn_startBreakNow?.visibility = View.VISIBLE
                         view?.tv_countdown?.visibility = View.INVISIBLE
                         view?.tv_workText?.visibility = View.INVISIBLE
@@ -414,7 +458,7 @@ class WorkFragment : Fragment(){
 
     // Short Break Timer
     fun breakTimer() {
-        myToolBar.visibility = View.VISIBLE
+        view?.myToolBar?.visibility = View.VISIBLE
         SESSION_TYPE = SessionType.BREAK
         breakColor()
         if(shortBreak == "null") {
@@ -428,27 +472,32 @@ class WorkFragment : Fragment(){
         if (timeInput == "null") {
             Toast.makeText(context, "Set a break time first", Toast.LENGTH_SHORT).show()
         } else {
-            progress_countdown.max = timeStart.toInt() * 1000 * 60
-            myToolBar.visibility = View.INVISIBLE
+            SESSION_STARTED = true
+
+            myListAdapter.checkBoxVisibility(true)
+            progress_countdown.max = timeStart.toInt() * 1000
+            view?.myToolBar?.visibility = View.INVISIBLE
             // CountDownTimer
-            timer = object: CountDownTimer(timeStart.toLong() * 1000 * 60, 1000) {
+            timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime = millisUntilFinished
                     tv_countdown.text = "" + String.format("%d:%d:%d",
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()* 1000 - millisUntilFinished).toInt()
 
                 }
                 override fun onFinish() {
+                    SESSION_STARTED = false
+                    myListAdapter.checkBoxVisibility(false)
                     progress_countdown.progress = 0
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
-                    myToolBar.visibility = View.VISIBLE
+                    view?.myToolBar?.visibility = View.VISIBLE
 
                     btn_start.visibility = View.VISIBLE
-
+                    view?.tv_toolbar?.text = "Focus"
                     tv_countdown.visibility = View.INVISIBLE
                     tv_workText.visibility = View.INVISIBLE
                     btn_stop.visibility = View.INVISIBLE
@@ -473,6 +522,8 @@ class WorkFragment : Fragment(){
 
         // Break Start-Pause Button
         btn_startPause.setOnClickListener {
+            SESSION_STARTED = true
+            myListAdapter.checkBoxVisibility(true)
             btn_pause.visibility = View.VISIBLE
             btn_startPause.visibility = View.INVISIBLE
             if(shortBreak == "null") {
@@ -489,14 +540,17 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()* 1000 - millisUntilFinished).toInt()
 
                 }
 
                 override fun onFinish() {
+                    SESSION_STARTED = false
+                    myListAdapter.checkBoxVisibility(false)
                     progress_countdown.progress = 0
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
+                    view?.tv_toolbar?.text = "Focus"
 
                     btn_start.visibility = View.VISIBLE
 
@@ -521,7 +575,7 @@ class WorkFragment : Fragment(){
 
     // Long Break Timer
     fun longBreakTimer() {
-        myToolBar.visibility = View.VISIBLE
+        view?.myToolBar?.visibility = View.VISIBLE
         SESSION_TYPE = SessionType.LONG_BREAK
         longBreakColor()
 
@@ -536,10 +590,12 @@ class WorkFragment : Fragment(){
         if (timeInput == "null") {
             Toast.makeText(context, "Set a long break time first", Toast.LENGTH_SHORT).show()
         } else {
-            progress_countdown.max = timeStart.toInt() * 1000 * 60
-            myToolBar.visibility = View.INVISIBLE
+            SESSION_STARTED = true
+            myListAdapter.checkBoxVisibility(true)
+            progress_countdown.max = timeStart.toInt() * 1000
+            view?.myToolBar?.visibility = View.INVISIBLE
             // CountDownTimer
-            timer = object: CountDownTimer(timeStart.toLong() * 1000 * 60, 1000) {
+            timer = object: CountDownTimer(timeStart.toLong() * 1000, 1000) {
 
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime = millisUntilFinished
@@ -547,14 +603,18 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
 
                 }
                 override fun onFinish() {
+                    SESSION_STARTED = false
+
+                    myListAdapter.checkBoxVisibility(false)
                     progress_countdown.progress = 0
-                    myToolBar.visibility = View.VISIBLE
+                    view?.myToolBar?.visibility = View.VISIBLE
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
+                    view?.tv_toolbar?.text = "Focus"
 
                     Log.d("TASK REQ: ", checkedTasks.toString())
 
@@ -580,7 +640,9 @@ class WorkFragment : Fragment(){
 
         // Long Break Start-Pause Button
         btn_startPause.setOnClickListener {
+            SESSION_STARTED = true
 
+            myListAdapter.checkBoxVisibility(true)
             btn_pause.visibility = View.VISIBLE
             btn_startPause.visibility = View.INVISIBLE
 
@@ -592,7 +654,7 @@ class WorkFragment : Fragment(){
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)))
-                        progress_countdown.progress = (timeStart.toLong()*1000*60 - millisUntilFinished).toInt()
+                        progress_countdown.progress = (timeStart.toLong()*1000 - millisUntilFinished).toInt()
 
 
                 }
@@ -600,9 +662,12 @@ class WorkFragment : Fragment(){
                 override fun onFinish() {
                     cancel()
                     tv_countdown.setText("HH:MM:SS")
+                    SESSION_STARTED = false
 
+                    myListAdapter.checkBoxVisibility(false)
 
                     btn_start.visibility = View.VISIBLE
+                    view?.tv_toolbar?.text = "Focus"
 
                     tv_countdown.visibility = View.INVISIBLE
                     tv_workText.visibility = View.INVISIBLE
@@ -672,9 +737,10 @@ class WorkFragment : Fragment(){
     fun saveRecord(){
         val title = et_task.text.toString()
         val isChecked = false
+        val priority = todoPriority
         databaseHandler = DatabaseHandler(context!!)
         if(title.trim()!=""){
-            val status = databaseHandler.addTodo(TodoModelClass(id = 0, title, isChecked))
+            val status = databaseHandler.addTodo(TodoModelClass(id = 0, title, isChecked, priority = priority))
             if(status > -1){
                 Toast.makeText(activity?.applicationContext, "New task added", Toast.LENGTH_LONG).show()
                 et_task.text.clear()
@@ -691,6 +757,10 @@ class WorkFragment : Fragment(){
         databaseHandler = DatabaseHandler(context!!)
         //calling the viewEmployee method of DatabaseHandler class to read the records
         todoList = databaseHandler.viewTasks() as MutableList<TodoModelClass>
+        todoList.sortBy { it.isChecked }
+
+
+
         //creating custom ArrayAdapter
         myListAdapter = RVTodoAdapter(activity!!, todoList)
         rv_todo_list.adapter = myListAdapter
@@ -723,5 +793,4 @@ class WorkFragment : Fragment(){
                 myListAdapter.notifyDataSetChanged()
             }
         }
-
 }
