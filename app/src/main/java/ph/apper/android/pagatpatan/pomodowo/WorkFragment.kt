@@ -474,7 +474,7 @@ class WorkFragment : Fragment(){
         } else {
             SESSION_STARTED = true
 
-            myListAdapter.checkBoxVisibility(true)
+            myListAdapter.checkBoxVisibility(false)
             progress_countdown.max = timeStart.toInt() * 1000
             view?.myToolBar?.visibility = View.INVISIBLE
             // CountDownTimer
@@ -523,7 +523,7 @@ class WorkFragment : Fragment(){
         // Break Start-Pause Button
         btn_startPause.setOnClickListener {
             SESSION_STARTED = true
-            myListAdapter.checkBoxVisibility(true)
+            myListAdapter.checkBoxVisibility(false)
             btn_pause.visibility = View.VISIBLE
             btn_startPause.visibility = View.INVISIBLE
             if(shortBreak == "null") {
@@ -591,7 +591,7 @@ class WorkFragment : Fragment(){
             Toast.makeText(context, "Set a long break time first", Toast.LENGTH_SHORT).show()
         } else {
             SESSION_STARTED = true
-            myListAdapter.checkBoxVisibility(true)
+            myListAdapter.checkBoxVisibility(false)
             progress_countdown.max = timeStart.toInt() * 1000
             view?.myToolBar?.visibility = View.INVISIBLE
             // CountDownTimer
@@ -642,7 +642,7 @@ class WorkFragment : Fragment(){
         btn_startPause.setOnClickListener {
             SESSION_STARTED = true
 
-            myListAdapter.checkBoxVisibility(true)
+            myListAdapter.checkBoxVisibility(false)
             btn_pause.visibility = View.VISIBLE
             btn_startPause.visibility = View.INVISIBLE
 
